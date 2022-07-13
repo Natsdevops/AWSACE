@@ -1,0 +1,665 @@
+public class AceHelperMethodsV2{   
+
+//---------------------------------CORE FUNCTIONS------------------------------------------    
+    
+    public static AWS__c CheckIntegrationType(String jsonString){
+        AWS__c setting;
+        JSONParser parser = JSON.createParser(jsonString);    
+               
+        while (parser.nextToken() != null) {
+            if (parser.getText() == 'spmsId'){
+                parser.nextToken();                 
+                if(parser.getText() == '1450'){
+                    setting = AWS__c.getValues('AWS Integration Settings');
+                }
+                else if(parser.getText() == '5896'){
+                    setting = AWS__c.getValues('AWS CMZ Integration Settings');  
+                }
+                else{
+                    System.debug('No Matching spmsID');
+                }
+            }        
+        }
+        System.debug('Check integration Type:' + setting);
+        return setting;
+    }
+    
+    public static AWS__c CheckIntegrationType(Integer integrationType){
+        AWS__c setting;
+        
+        switch on integrationType{
+            when 0{
+                setting = AWS__c.getValues('AWS Integration Settings');
+            }
+            when 1{
+                setting = AWS__c.getValues('AWS CMZ Integration Settings');
+            }
+            when else{
+                system.debug('No integration setting found'); 
+            }
+        }
+        System.debug('Check integration Type:' + setting);
+        return setting;
+    }
+      
+    public static List<OpportunityJSON> ReadAWSUpdate(String jsonString){       
+        List<OpportunityJSON> opps = new List<OpportunityJSON>();
+        JSONParser parser = JSON.createParser(jsonString);
+         
+        while (parser.nextToken() != null) {
+            if (parser.getText() == 'opportunities') {            
+                while (parser.nextToken() != null) {                                    
+                    if (parser.getCurrentToken() == JSONToken.START_OBJECT) {                 
+                        OpportunityJSON opp = (OpportunityJSON)parser.readValueAs(OpportunityJSON.class);
+                            if(opp.partnerCrmUniqueIdentifier != null){
+                                if(!opp.partnerCrmUniqueIdentifier.startsWith('CR')){
+                                    System.debug('ReadAWSUpdate:' + opp); 
+                                    opps.add(opp);
+                                }
+                                else{
+                                system.debug(opp.name + ' has been excluded from syncing. APN ID: ' + opp.APNCRMUniqueIdentifier);
+                                }
+                            }
+                            else{
+                                System.debug('ReadAWSUpdate:' + opp);
+                                opps.add(opp);
+                            }                                                  
+                    } 
+                }
+            }
+            parser.getText();
+            
+        } 
+        return opps;           
+    }     
+    
+    public static Map<String,Opportunity> CreateAPNIdtoOppMapping(List<OpportunityJSON> opps){        
+        List<String> UpdateIDsFromJSON = new List<String>();
+        List<String> InsertAPNIDsFromJSON = new List<String>();
+        Map<String,Opportunity> oppMapping = new Map<String,Opportunity>();
+        
+        for(OpportunityJSON oppJson : opps){
+            if(oppJson.partnerCrmUniqueIdentifier != null){
+                UpdateIDsFromJSON.add(oppJson.partnerCrmUniqueIdentifier);
+            }
+            else{
+               InsertAPNIDsFromJSON.add(oppJson.APNCRMUniqueIdentifier); 
+            }
+        }
+        
+        System.debug(UpdateIDsFromJSON);
+        System.debug(InsertAPNIDsFromJSON);
+        
+        List<Opportunity> APNUpdateOpps = 
+            [SELECT 
+                id, 
+                APN_CRM_Unique_Identifier__c, 
+                AWS_Update_Success__c, 
+                AWS_Update_Errors__c, 
+                IsClosed, 
+                OwnerId, 
+                StageName, 
+                CloseDate, 
+                First_Accepted_by_AWS__c,
+                AWS_Acceptance_Status__c, 
+                AWS_Launched_Date__c, 
+                AWS_Sub_Use_Case__c, 
+                AWS_Closed_Lost_Date__c 
+            FROM 
+                Opportunity 
+            WHERE 
+                id IN :UpdateIDsFromJSON];
+                
+        System.debug(APNUpdateOpps);
+        
+        List<String> queriedIds = new List<String>();
+        
+        for(Opportunity o : APNUpdateOpps){
+            queriedIds.add(o.id);
+        }
+        
+        List<String> UpdateAPNIDsFromJSON = new List<String>();
+        
+        for(OpportunityJSON oppJson : opps){
+            if(!queriedIds.contains(oppJson.partnerCrmUniqueIdentifier)){
+                UpdateAPNIDsFromJSON.add(oppJson.APNCRMUniqueIdentifier);
+            }
+        }
+        
+        List<Opportunity> APNUpdateOpps2 = 
+            [SELECT 
+                id, 
+                APN_CRM_Unique_Identifier__c, 
+                AWS_Update_Success__c, 
+                AWS_Update_Errors__c, 
+                IsClosed, 
+                OwnerId, 
+                StageName, 
+                CloseDate, 
+                First_Accepted_by_AWS__c,
+                AWS_Acceptance_Status__c, 
+                AWS_Launched_Date__c, 
+                AWS_Sub_Use_Case__c, 
+                AWS_Closed_Lost_Date__c 
+            FROM 
+                Opportunity 
+            WHERE 
+                APN_CRM_Unique_Identifier__c IN :UpdateAPNIDsFromJSON];
+        
+        system.debug(APNUpdateOpps2);
+        
+        for(OpportunityJSON oppJson : opps){
+            if(oppJson.partnerCrmUniqueIdentifier != null && queriedIds.contains(oppJson.partnerCrmUniqueIdentifier)){
+                for(Opportunity o : APNUpdateOpps){
+                    if(o.id == oppJson.partnerCrmUniqueIdentifier){
+                        oppMapping.put(oppJson.APNCRMUniqueIdentifier,o);
+                    }
+                }                   
+            }
+            else if(oppJson.partnerCrmUniqueIdentifier != null && UpdateAPNIDsFromJSON.contains(oppJson.APNCRMUniqueIdentifier)){
+                for(Opportunity o : APNUpdateOpps2){
+                    if(o.APN_CRM_Unique_Identifier__c == oppJson.APNCRMUniqueIdentifier){
+                        oppMapping.put(oppJson.APNCRMUniqueIdentifier,o);
+                    }
+                }  
+            }
+            else{
+                oppMapping.put(oppJson.APNCRMUniqueIdentifier,new Opportunity());    
+            }
+        }
+        System.debug('Create APN Id to Opp Mapping:' + oppMapping);
+        return oppMapping;        
+    }    
+    
+    public static Map<Database.UpsertResult,String> UpsertOpps(Map<String,Opportunity> APNtoOppMapping,List<OpportunityJSON> opps,AWS__c settings){
+        List<Opportunity> upsertList = new List<Opportunity>();
+        
+        for(OpportunityJSON json : opps){
+            Opportunity o = APNtoOppMapping.get(json.APNCRMUniqueIdentifier);
+            
+            if(o == null){
+                o = new Opportunity();
+            }
+            
+            System.debug(o);
+            
+            if(json.partnerCrmUniqueIdentifier == null){
+                
+                if(CheckFirstLaunched(o,json)){
+                    o.AWS_Launched_Date__c = Date.Today();
+                }
+                
+                o.AccountId = settings.AWS_Integration_Account_ID__c;
+                o.OwnerId = settings.Integration_User_Id__c;
+                o.Name = CheckNameLength(json);
+                o.Type = 'New';
+                o.LeadSource = 'Vendor Referral';
+                o.Detailed_Source__c = 'Other';
+                o.Service_line__c = settings.Service_Line__c;
+                o.Opportunity_business_unit__c = settings.Business_Unit__c;
+                o.recordTypeId = settings.AWS_Record_Type_ID__c;
+                o.APN_CRM_Unique_Identifier__c = json.APNCRMUniqueIdentifier;
+                o.AWS_Use_Case__c = json.useCase;
+                o.CloseDate = date.valueOf(json.targetCloseDate);
+                o.stageName = AceHelperMethodsV2.ConvertStage(json);
+                o.Project_Description__c = json.projectDescription;                
+                o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
+                o.industry__c = json.industry;
+                o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
+                o.AWS_Acceptance_Status__c = json.status;
+                o.Opportunity_ownership__c = json.opportunityOwnership;
+                o.AWS_Sales_Rep__c = json.aWSSalesRepName;
+                o.AWS_Sales_Rep_Email__c = json.aWSSalesRepEmail;
+                o.AWS_Customer_Title__c = json.customerTitle;
+                o.AWS_Customer_Name__c = json.customerFirstName + ' ' + json.customerLastName;
+                o.AWS_Customer_Company_Name__c = json.customerCompanyName;
+                o.AWS_Customer_Email__c = json.customerEmail;
+                o.AWS_Customer_Phone__c = json.customerPhone;
+                o.nextStep = json.nextStep;
+                o.AWS_Sub_Use_Case__c = json.subUseCase;                                                         
+            }
+            else if(AceHelperMethodsV2.AllowAWSUpdates(o)){ 
+                
+                if(CheckFirstLaunched(o,json)){
+                    o.AWS_Launched_Date__c = Date.Today();
+                }
+                
+                if(checkFirstClosedLost(o,json)){
+                    o.AWS_Closed_Lost_Date__c = Date.Today();
+                }
+                
+                if(AceHelperMethodsV2.AllowStageAndCloseDateUpdates(o,settings)){
+                    o.stageName = AceHelperMethodsV2.ConvertStage(json);
+                    o.CloseDate = date.valueOf(json.targetCloseDate);
+                }
+                
+                if(CheckFirstApproved(o,json)){
+                    o.First_Accepted_by_AWS__c = Date.Today();
+                } 
+                 
+                o.APN_CRM_Unique_Identifier__c = json.APNCRMUniqueIdentifier;             
+                o.AWS_Use_Case__c = json.useCase;
+                o.Name = CheckNameLength(json);
+                o.Project_Description__c = json.projectDescription;
+                o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
+                o.industry__c = json.industry;
+                o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
+                o.Reasons_for_loosing__c = json.closedLostReason;
+                o.AWS_Acceptance_Status__c = json.status;
+                o.Opportunity_ownership__c = json.opportunityOwnership;
+                o.AWS_Sales_Rep__c = json.aWSSalesRepName;
+                o.AWS_Sales_Rep_Email__c = json.aWSSalesRepEmail;
+                o.AWS_Customer_Title__c = json.customerTitle;
+                o.AWS_Customer_Name__c = json.customerFirstName + ' ' + json.customerLastName;
+                o.AWS_Customer_Company_Name__c = json.customerCompanyName;
+                o.AWS_Customer_Email__c = json.customerEmail;
+                o.AWS_Customer_Phone__c = json.customerPhone;
+                o.nextStep = json.nextStep;
+                o.AWS_Sub_Use_Case__c = json.subUseCase;                
+            }
+            upsertList.add(o);          
+        }       
+        Database.UpsertResult[] upsertResults = database.upsert(upsertList,false);
+        Map<Database.UpsertResult,String> resultMap = new Map<Database.UpsertResult,String>();
+        
+        for(Integer i = 0;i < upsertResults.size();i++){
+            resultMap.put(upsertResults[i],upsertList[i].APN_CRM_Unique_Identifier__c);
+        }
+        
+        System.debug('Result Map:' + resultMap);
+        return resultMap;       
+    }
+/*    
+    public static List<Opportunity> QueryUpsertedOpps(Database.UpsertResult[] upsertResults){
+        List<Opportunity> upsertedOpps = new List<Opportunity>();
+        list<String> queryIds = new List<String>();
+        
+        for(Database.UpsertResult result : upsertResults){
+            queryIds.add(result.getId());
+        }
+        
+        upsertedOpps = [SELECT id, APN_CRM_Unique_Identifier__c FROM Opportunity WHERE id IN :queryIds];
+        system.debug('Query Upserted Opps:' + upsertedOpps);                
+        return upsertedOpps;
+    }
+*/    
+    public static void ProcessUpsertResults(Map<Database.UpsertResult,String> resultMap, AWS__c settings){
+        List<AWS_Integration_Log__c> logs = new List<AWS_Integration_Log__c>();        
+        
+        for(Database.UpsertResult result : resultMap.keySet()){
+            String error = '';
+            
+            if(!result.isSuccess()){
+                AWS_Integration_Log__c log = new AWS_Integration_Log__c();
+                log.Account__c = settings.AWS_Integration_Account_ID__c;
+                
+                for(Database.Error err : result.getErrors()){
+                    error += err.getMessage() + '; '; 
+                }
+                
+                log.error__c = error;
+                log.APN_Id__c = resultMap.get(result);
+                
+                if(!result.isCreated()){
+                    log.Opportunity__c = result.getId();
+                }
+                
+                logs.add(log);
+            }
+        }
+        System.debug('Process Upsert Results:' + logs);
+        Insert logs;    
+    }
+    
+    public static OpportunityJSON PrepareJSONRequest(Opportunity o){
+        OpportunityJSON oppJSON = new OpportunityJSON();
+        oppJSON.name = o.name;
+        oppJSON.partnerProjectTitle = AceHelperMethodsV2.CheckAWSName(o); 
+        oppJSON.stage = AceHelperMethodsV2.ConvertStage(o);            
+        oppJSON.APNCRMUniqueIdentifier = o.APN_CRM_Unique_Identifier__c;                 
+        oppJSON.useCase = o.AWS_Use_Case__c;
+        oppJSON.targetCloseDate = String.valueOf(o.CloseDate);
+        oppJSON.projectDescription = o.Project_Description__c;
+        oppJSON.primaryContactEmail = o.Owner.Email;
+        //function to convert billing countrty code
+        oppJSON.postalCode = o.Account.BillingPostalCode;           
+        oppJSON.partnerPrimaryNeedFromAws = o.Partner_Primary_Need__c;            
+        oppJSON.partnerCrmUniqueIdentifier = o.id;
+        oppJSON.industry = o.industry__c;
+        oppJSON.expectedMonthlyAwsRevenue = (Integer) o.Expected_Monthly_AWS_Revenue__c;
+        oppJSON.deliveryModel = o.Delivery_Model__c;
+        oppJSON.customerWebsite = o.Account.Website;
+        oppJSON.customerCompanyName = o.Account.Name;
+        oppJSON.country = o.Account.BillingCountry;
+        oppJSON.contractVehicle = o.Contract_Vehicle__c;
+        oppJSON.closedLostReason = o.Reasons_for_loosing__c;
+        //function to convert state
+        oppJSON.state = o.Account.BillingState;
+        oppJSON.primaryContactLastName = o.Owner.LastName;
+        oppJSON.primaryContactFirstName = o.Owner.FirstName;
+        oppJSON.primaryContactPhone = o.Owner.Phone;
+        oppJSON.customerTitle = o.Primary_Contact__r.Salutation;
+        oppJSON.customerPhone = o.Primary_Contact__r.Phone;
+        oppJSON.customerLastName = o.Primary_Contact__r.LastName;
+        oppJSON.customerFirstName = o.Primary_Contact__r.FirstName;
+        oppJSON.customerEmail = o.Primary_Contact__r.Email;
+        oppJSON.partnerAcceptanceStatus = o.Acceptance_status__c;
+        oppJSON.nextStep = o.NextStep;
+        oppJSON.awsAccountId = o.Customer_AWS_Account_Id__c;
+        oppJSON.additionalComments = o.AWS_Campaign__c;
+        oppJSON.subUseCase = o.AWS_Sub_Use_Case__c;
+        oppJSON.campaignName = String.ValueOf(o.AWS_Campaign_Name__c); 
+        oppJSON.isMarketingDevelopmentFunded = String.ValueOf(o.Marketing_Development_Funded__c);
+        oppJSON.isThisForMarketplace = String.ValueOf(o.Is_this_Marketplace__c);
+        System.debug('Prepare JSON Request:' + oppJSON);    
+        return oppJSON;
+    }
+    
+    @future
+    public static void CRUpdateResultsHandler(string jsonResponse){
+        List<OpportunityResultJSON> results = AceHelperMethodsV2.ReadCRUpdateResults(jsonResponse);                                                   
+        AceHelperMethodsV2.ProcessCRUpdateResults(results);
+    }
+    
+    public static List<OpportunityResultJSON> ReadCRUpdateResults(string jsonResponse){
+        String trimmedJson = jsonResponse.replace('\n','');
+        List<OpportunityResultJSON> results = new List<OpportunityResultJSON>();
+        JSONParser parser = JSON.createParser(trimmedJson);
+        
+        while (parser.nextToken() != null) {       
+            if (parser.getText() == 'inboundApiResults') {           
+                while (parser.nextToken() != null) {               
+                    if (parser.getCurrentToken() == JSONToken.START_OBJECT) {                  
+                        OpportunityResultJSON result = (OpportunityResultJSON)parser.readValueAs(OpportunityResultJSON.class);
+                        results.add(result);                       
+                    } 
+                }
+            }
+        }        
+        System.debug('Read CR Update Results:' + results);  
+        return results;
+    }
+    
+    public static void ProcessCRUpdateResults(List<OpportunityResultJSON> results){
+        Map<Id,List<String>> oppIdMapping = new Map<Id,List<String>>();
+        
+        for(OpportunityResultJSON result : results){
+            List<String> oppResults = new List<String>{String.valueOf(result.isSuccess)};    
+            
+            system.debug('created list...');
+            
+            if(result.errors != null){
+                system.debug('there are some errors...');
+                oppResults.add(String.valueOf(result.errors.size()));
+            }
+            else{
+                system.debug('there are no errors...');
+                oppResults.add('0');
+            }
+                               
+            if(!String.isBlank(result.apnCrmUniqueIdentifier)){
+                system.debug('there is an Apn id...');
+                oppResults.add(result.apnCrmUniqueIdentifier);
+            }
+            else{
+                system.debug('there is no Apn id...');
+                oppResults.add('');
+            }
+            
+            if(Integer.valueOf(oppResults[1]) > 0 ){
+                system.debug('there are some errors...');
+                for(String s : result.errors){
+                    system.debug('adding error...');                
+                    oppResults.add(s);
+                }
+            }
+            else{
+            system.debug('there are no errors...');
+                oppResults.add('');
+            }    
+            oppIdMapping.put(result.partnerCrmUniqueIdentifier,oppResults);
+            system.debug('result mapping: ' + oppIdMapping);
+        }
+        
+        List<Opportunity> oppsToUpdate = [SELECT id, AWS_Update_Success__c, AWS_Update_Errors__c, APN_CRM_Unique_Identifier__c FROM Opportunity WHERE id IN :oppIdMapping.keySet() FOR UPDATE];
+        system.debug('Queried opps: ' + oppsToUpdate);
+        
+        List<String> result;
+        integer errorCount = 0;
+        
+        for(Opportunity o : oppsToUpdate){
+            system.debug('getting result from map...');
+            result = oppIdMapping.get(o.id);
+            system.debug('result: '+ result);
+            o.AWS_Update_Success__c = result[0];
+            
+            if(o.APN_CRM_Unique_Identifier__c == null){
+                system.debug('assigning apn Id');
+                o.APN_CRM_Unique_Identifier__c = result[2];
+            }
+            
+            system.debug('counting errors...');
+            errorCount = Integer.valueOf(result[1]);
+            o.AWS_Update_Errors__c = '';
+            
+            while(errorCount > 0){
+                system.debug('assignig errors...');
+                if(!String.isBlank(result[errorCount + 2])){                   
+                    o.AWS_Update_Errors__c += result[errorCount + 2] +';';
+                    system.debug('error assigned...');
+                }
+                errorCount -= 1;              
+            }
+        } 
+        system.debug('Process CR Update Reults:' + oppsToUpdate);
+        Update oppsToUpdate; 
+    }
+    
+//---------------------------------SECONDARY FUNCTIONS------------------------------------------------------    
+    
+    public static String ConvertStage(Opportunity o){
+        String convertedStage = '';
+        
+        switch on o.stageName{
+            when 'Prospect'{
+                convertedStage = 'Prospect';
+            }         
+            when 'Qualify'{
+                convertedStage = 'Qualified';
+            }           
+            when 'Propose'{
+                convertedStage = 'Technical Validation';
+            }           
+            when 'Negotiate'{
+                convertedStage = 'Business Validation';
+            }
+            when 'Procure'{
+                convertedStage = 'Committed';
+            }           
+            when 'Closed Won'{
+                if(o.Customer_AWS_Account_Id__c != null){
+                    convertedStage = 'Launched';
+                }
+                else{
+                    convertedStage = 'Committed';
+                }
+            }
+            when 'Order Validated'{
+                    convertedStage = 'Launched';
+            }
+            when 'Closed Lost'{
+                convertedStage = 'Closed Lost';
+            }
+        }
+        System.debug('Convert Stage:' + convertedStage);
+        return convertedStage;
+    }
+    
+    public static String ConvertStage(OpportunityJSON json){
+        String convertedStage = '';
+        
+        switch on json.stage{
+            when 'Prospect'{
+                convertedStage = 'Prospect';
+            } 
+            when 'Qualified'{
+                convertedStage = 'Qualify';
+            }
+            when 'Technical Validation'{
+                convertedStage = 'Propose';
+            }
+            when 'Business Validation'{
+                convertedStage = 'Negotiate';
+            }
+            when 'Committed'{
+                convertedStage = 'Procure';
+            }
+            when 'Launched'{
+                convertedStage = 'Closed Won';
+            }
+            when 'Closed Lost'{
+                convertedStage = 'Closed Lost';
+            }
+        }
+        System.debug('Convert Stage:' + convertedStage);
+        return convertedStage;
+    }
+    
+    public static Boolean AllowAWSUpdates(Opportunity o){              
+        Boolean allowUpdates = true;  
+                 
+        if(o.isClosed){
+            allowUpdates = false;
+        }
+        
+        System.debug('Allow AWS Updates:' + allowUpdates);
+        return allowUpdates;
+    }
+  
+    public static Boolean AllowStageAndCloseDateUpdates(Opportunity o, AWS__c settings){               
+        Boolean allowUpdates = false;
+        
+        if(o.OwnerID == settings.Integration_User_Id__c){
+            allowUpdates = true;
+        }
+
+        System.debug('Allow Stage and Close Date Updates:' + allowUpdates);
+        return allowUpdates;
+    }
+    
+    public static String CheckNameLength(OpportunityJSON json){
+        String name = '';
+        if(json.partnerProjectTitle != null){
+            if(json.partnerProjectTitle.length() <= 50){
+                name = json.partnerProjectTitle;
+            }
+            else{
+                name = json.partnerProjectTitle.left(50);
+            }
+            System.debug('Check Name Length:' + name);
+        }
+        return name;
+    }
+    
+    public static String CheckAWSName(Opportunity o){
+        String name = '';
+               
+        if(o.AWS_Opportunity_Name__c == null){
+            name = o.name;
+        }
+        else{
+            name = o.AWS_Opportunity_Name__c;
+        }
+        
+        System.debug('Check AWS Name:' + name);
+        return name;
+    }
+    
+    public static Boolean CheckFirstShared(Opportunity o){
+        Boolean firstShared = false;
+        
+        if(o.APN_CRM_Unique_Identifier__c == null && o.First_Shared_with_AWS__c == null){
+            firstShared = true;
+        }
+        
+        System.debug('Check First Shared:' + firstShared);
+        return firstShared; 
+    }
+    
+    public static Boolean CheckFirstApproved(Opportunity o,OpportunityJSON json){
+        Boolean firstApproved = false;
+        
+        if(o.First_Accepted_by_AWS__c == null && o.AWS_Acceptance_Status__c != 'Approved' && json.status == 'Approved'){
+            firstApproved = true;
+        }
+        
+        System.debug('Check First Approved:' + firstApproved);
+        return firstApproved; 
+    }
+    
+    public static Boolean CheckFirstLaunched(Opportunity o,OpportunityJSON json){
+        Boolean firstLaunched = false;
+        
+        if(o.AWS_Launched_Date__c == null && json.stage == 'Launched'){
+            firstLaunched = true;
+        }
+        
+        System.debug('Check First Launched:' + firstLaunched);
+        return firstLaunched;
+    }
+    
+    public static Boolean checkFirstClosedLost(Opportunity o, OpportunityJSON json){
+        Boolean firstClosedLost = false;
+        
+        if(o.AWS_Closed_Lost_Date__c == null && json.stage == 'Closed Lost'){
+            firstClosedLost = true;
+        }
+        
+        System.debug('Check First Closed Lost:' + firstClosedLost);
+        return firstClosedLost;
+    }
+    
+//---------------------------------API REQUESTS ----------------------------------------      
+            
+    public static String PutCRUpdateCallout(AWS__c settings, List<OpportunityJSON> oppJSONScope){
+        Map<String,Object> OppMap = new Map<String,Object>();
+        OppMap.put('opportunities',oppJSONScope);
+        OppMap.put('version','1');
+        OppMap.put('spmsId',settings.spmsId__c);
+                    
+        String finalJSON = JSON.serialize(OppMap);
+        
+        Http http = new Http();
+        HttpRequest req = new HttpRequest(); 
+
+        String user = settings.AWS_User__c;
+        String pass = settings.AWS_Password__c;
+        String region = settings.AWS_Region__c;
+        String bucketName = settings.AWS_Bucket__c;
+        
+        String endPointURL = 'https://s3.'+ region +'.amazonaws.com/' + bucketName + '/opportunity-inbound/';
+        String filename = 'OpportunityBatch';
+        filename += '-' + Datetime.now().month() + '-' + Datetime.now().day() + '-' + Datetime.now().year();
+        filename += '-' + Datetime.now().hour() + 'h-' + Datetime.now().minute() + 'm-' + Datetime.now().second() + 's';
+        String processedPath = filename;
+        filename += '.json';
+        PageReference pr = new PageReference(endPointURL + filename);
+        Url endpoint = new Url(pr.getUrl());
+                                               
+        Map<String,String> headers1 = new Map<String,String>();
+        headers1.put('x-amz-acl', 'bucket-owner-full-control');
+
+        S3_Authentication s3Authentication = new S3_Authentication();
+        req = s3Authentication.signedRequest('PUT',endpoint,headers1,Blob.valueOf(finalJSON),true,user,pass,region);        
+        System.debug(req);        
+                
+        HTTPResponse res = http.send(req);
+        System.debug(res);
+        
+        if (res.getStatusCode() == 200) {
+            processedPath += '_result.json';
+            }
+        System.debug('CR UPdate Callout:' + processedPath);    
+        return processedPath;
+    }   
+}
