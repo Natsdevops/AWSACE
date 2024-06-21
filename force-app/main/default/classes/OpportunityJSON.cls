@@ -27,6 +27,8 @@ public Class OpportunityJSON{
         public Date firstApproved;
         public Date launchedDate;
         public Date closedLostDate;
+        public String IsOppFromMarketingActivity;
+        public String  rfxSolicitationNumber;
 
         public String projectDescription{
             get{ return projectDescription;}
@@ -112,6 +114,9 @@ public Class OpportunityJSON{
         public String aWSAccountOwnerEmail;
         public String awsAccountId;
         public String additionalComments;
+        public String marketingActivityChannel;
+        public String marketingActivityUsecase;
+        public String awsSFCampaignName;
 /*        
         public String status{
             get{ return status;}

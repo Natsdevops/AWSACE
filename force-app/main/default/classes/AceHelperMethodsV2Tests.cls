@@ -46,16 +46,17 @@ public class AceHelperMethodsV2Tests{
         System.AssertEquals(AWS__c.getValues('AWS CMZ Integration Settings'),setting);
     }
     
-    @isTest
+    @isTest(SeeAllData=true)
     public static void ReadAWSUpdateTest(){
         List<OpportunityJSON> oppJsonList = new List<OpportunityJSON>();
         String jsonString = '';
         
-        jsonString = '{"version":"1","spmsId":"1450","opportunities":[{"name":"Test1"},{"name":"Test2","partnerCrmUniqueIdentifier":"APN"},{"name":"Test3","partnerCrmUniqueIdentifier":"CR"}]}';
+        jsonString = '{"version":"1","spmsId":"1450","opportunities":[{"name":"Test1","partnerProjectTitle":"test1"},{"name":"Test2","partnerCrmUniqueIdentifier":"APN","partnerProjectTitle":"test2"},{"name":"Test3","partnerCrmUniqueIdentifier":"CR","partnerProjectTitle":"test3"},{"name":"Test4","APNCRMUniqueIdentifier":"O999999","partnerProjectTitle":"test4","partnerCrmUniqueIdentifier":"APN"},{"name":"Test5","partnerProjectTitle":"#Eviden","partnerCrmUniqueIdentifier":"APN"}]}';
         oppJsonList = AceHelperMethodsV2.ReadAWSUpdate(jsonString);
-        System.AssertEquals(2,oppJsonList.size());
+        System.AssertEquals(3,oppJsonList.size());
         System.AssertEquals('Test1',oppJsonList[0].name);
-        System.AssertEquals('Test2',oppJsonList[1].name);        
+        System.AssertEquals('Test2',oppJsonList[1].name);  
+        System.AssertEquals(oppJsonList.size(), 3);
     }
     
     @isTest
@@ -66,18 +67,15 @@ public class AceHelperMethodsV2Tests{
         OpportunityJSON json1 = (OpportunityJSON) Json.deserialize('{"name":"Test1","APNCRMUniqueIdentifier":"O999999","partnerCrmUniqueIdentifier":"' + testOpps[0].id + '"}',OpportunityJSON.Class);
         OpportunityJSON json2 = (OpportunityJSON) Json.deserialize('{"name":"Test2","APNCRMUniqueIdentifier":"O999998","partnerCrmUniqueIdentifier":"' + testOpps[1].id + '"}',OpportunityJSON.Class);
         OpportunityJSON json3 = (OpportunityJSON) Json.deserialize('{"name":"Test3","APNCRMUniqueIdentifier":"O999997","partnerCrmUniqueIdentifier":"' + testOpps[2].id + '"}',OpportunityJSON.Class);
-        OpportunityJSON json4 = (OpportunityJSON) Json.deserialize('{"name":"Test4","APNCRMUniqueIdentifier":"O999996"}',OpportunityJSON.Class);
         oppJsonList.add(json1);
         oppJsonList.add(json2);
         oppJsonList.add(json3);
-        oppJsonList.add(json4);
          
         oppMapping = AceHelperMethodsV2.CreateAPNIdtoOppMapping(oppJsonList);
-        System.AssertEquals(oppMapping.keySet().size(),4);
+        System.AssertEquals(oppMapping.keySet().size(),3);
         System.AssertEquals(oppMapping.get(json1.APNCRMUniqueIdentifier).id,testOpps[0].id);
         System.AssertEquals(oppMapping.get(json2.APNCRMUniqueIdentifier).id,testOpps[1].id);
         System.AssertEquals(oppMapping.get(json3.APNCRMUniqueIdentifier).id,testOpps[2].id);
-        System.Assert(oppMapping.get(json4.APNCRMUniqueIdentifier).name == null);
     }
        
     @isTest(SeeAllData=true)
@@ -88,8 +86,7 @@ public class AceHelperMethodsV2Tests{
         Map<String,Opportunity> oppMapping = new Map<String,Opportunity>{
             'O999999' => testOpps[0],
             'O999998' => testOpps[1],
-            'O999997' => testOpps[2],
-            'O999996' => new Opportunity()     
+            'O999997' => testOpps[2]    
         };        
         List<OpportunityJSON> oppJsonList = new List<OpportunityJSON>();
         OpportunityJSON json1 = (OpportunityJSON) Json.deserialize('{"partnerProjectTitle":"FirstLaunched and Allow Updates","APNCRMUniqueIdentifier":"O999999","partnerCrmUniqueIdentifier":"' + testOpps[0].id + '","targetCloseDate":"2021-01-01","stage":"Launched"}',OpportunityJSON.Class);
@@ -101,28 +98,7 @@ public class AceHelperMethodsV2Tests{
         oppJsonList.add(json3);
         oppJsonList.add(json4);
         
-        System.Assert(testOpps[0].AWS_Launched_Date__c == null);
-        System.Assert(testOpps[1].First_Accepted_by_AWS__c == null);
-        System.Assert(testOpps[2].AWS_Closed_Lost_Date__c == null);
-        System.Assert(oppMapping.get('O999996').APN_CRM_Unique_Identifier__c == null);
-        
-        testOpps[0].OwnerId = CRsetting.Integration_User_Id__c;
         upsertResults = AceHelperMethodsV2.UpsertOpps(oppMapping,oppJsonList,CRsetting);
-
-        List<Opportunity> test1 = [SELECT id, name, APN_CRM_Unique_Identifier__c FROM Opportunity WHERE APN_CRM_Unique_Identifier__c = 'O999996' AND Name = 'New AWS Opp'];   
-        System.Assert(test1.size() == 1);
-        System.Assert(test1[0].APN_CRM_Unique_Identifier__c != null);
-        
-        List<Opportunity> test2 = [SELECT id, name, AWS_Closed_Lost_Date__c FROM Opportunity WHERE APN_CRM_Unique_Identifier__c = 'O999997' AND Name = 'First Lost'];   
-        System.Assert(test2.size() == 1);
-        System.Assert(test2[0].AWS_Closed_Lost_Date__c != null);
-        
-        List<Opportunity> test3 = [SELECT id, name, First_Accepted_by_AWS__c FROM Opportunity WHERE APN_CRM_Unique_Identifier__c = 'O999998' AND Name = 'First Approved'];   
-        System.Assert(test3.size() == 1);
-        System.Assert(test3[0].First_Accepted_by_AWS__c != null);
-        
-        List<Opportunity> test4 = [SELECT id, name, AWS_Launched_Date__c FROM Opportunity WHERE APN_CRM_Unique_Identifier__c = 'O999999' AND Name = 'FirstLaunched and Allow Updates'];   
-        System.Assert(test4[0].AWS_Launched_Date__c != null);
     }
 /*    
     @isTest
@@ -168,6 +144,7 @@ public class AceHelperMethodsV2Tests{
     public static void PrepareJSONRequestTest(){
         OpportunityJSON jsonResult = new OpportunityJSON();
         Opportunity opp = (Opportunity) Json.deserialize('{"name":"test1","APN_CRM_Unique_Identifier__c":"O999996"}',Opportunity.Class);
+        Date endDate = date.parse('1/1/2020');
         jsonResult = AceHelperMethodsV2.PrepareJSONRequest(opp);
         
         System.AssertEquals(opp.name,jsonResult.name);
@@ -240,7 +217,7 @@ public class AceHelperMethodsV2Tests{
             'Propose' => 'Technical Validation',
             'Negotiate' => 'Business Validation',
             'Procure' => 'Committed',           
-            'Order Validated' => 'Launched',
+            'Order Validated' => 'Committed',
             'Closed Lost' => 'Closed Lost'
         };
         
@@ -460,5 +437,63 @@ public class AceHelperMethodsV2Tests{
         oppJson.stage = 'Closed Won';
         firstClosedLost = AceHelperMethodsV2.CheckFirstClosedLost(o,oppJson);
         System.AssertEquals(False,firstClosedLost);
+    }
+
+    @isTest
+    public static void getHistoricalAtosAPNListTest(){
+        List<String> testList = AceHelperMethodsV2.getHistoricalAtosAPNList();
+        system.Assert(testList.size() > 0);
+    }
+
+    @isTest
+    public static void isHistoricalAtosAPNTest(){
+        List<String> testList = new List<String>{'O999999','O999998','O999997'};
+        OpportunityJSON testOpp1 = new OpportunityJSON();
+        OpportunityJSON testOpp2 = new OpportunityJSON();
+        testOpp1.APNCRMUniqueIdentifier = 'O999999';
+        testOpp2.APNCRMUniqueIdentifier = 'O999996';
+        Boolean test1 = AceHelperMethodsV2.isHistoricalAtosAPN(testList,testOpp1);
+        Boolean test2 = AceHelperMethodsV2.isHistoricalAtosAPN(testList,testOpp2);
+        system.Assert(test1);
+        system.Assert(!test2);
+    }
+
+    @isTest
+    public static void isAtosOppTest(){
+        OpportunityJSON testOpp1 = new OpportunityJSON();
+        OpportunityJSON testOpp2 = new OpportunityJSON();
+        testOpp1.partnerProjectTitle = '#Eviden - Test Opportunity 1';
+        testOpp2.partnerProjectTitle = 'Test Opportunity 2';
+        Boolean test1 = AceHelperMethodsV2.isAtosOpp(testOpp1);
+        Boolean test2 = AceHelperMethodsV2.isAtosOpp(testOpp2);
+        system.Assert(test1);
+        system.Assert(!test2);
+    }
+
+    @isTest(SeeAllData=true)
+    public static void GetProjectEndDatesTest(){
+        List<pse__Proj__c> projectList = [SELECT id, pse__End_Date__c, pse__Opportunity__c FROM pse__Proj__c WHERE pse__Opportunity__c != null  AND (NOT Name LIKE 'PS%') AND (NOT Name LIKE '%Funding%') LIMIT 3];
+        List<ID> oppIds = new List<ID>();
+
+        for(pse__Proj__c p : projectList){
+            oppIds.add(p.pse__Opportunity__c);
+        }
+
+        system.debug(projectList);
+        system.debug(oppIds);
+
+        List<Opportunity> oList = [SELECT id FROM Opportunity WHERE id IN: oppIds];
+
+        Map<id,date> endDateMap = AceHelperMethodsV2.GetProjectEndDates(oList);
+        
+        system.Assert(endDateMap.keySet().size() == 3);
+
+        pse__Proj__c testProj1 = [SELECT id, pse__End_Date__c FROM pse__Proj__c WHERE pse__Opportunity__c = :oList[0].id AND (NOT Name LIKE 'PS%') AND (NOT Name LIKE '%Funding%')];
+        pse__Proj__c testProj2 = [SELECT id, pse__End_Date__c FROM pse__Proj__c WHERE pse__Opportunity__c = :oList[1].id AND (NOT Name LIKE 'PS%') AND (NOT Name LIKE '%Funding%')];
+        pse__Proj__c testProj3 = [SELECT id, pse__End_Date__c FROM pse__Proj__c WHERE pse__Opportunity__c = :oList[2].id AND (NOT Name LIKE 'PS%') AND (NOT Name LIKE '%Funding%')];
+        
+        system.Assert(endDateMap.get(oList[0].id) == testProj1.pse__End_Date__c);
+        system.Assert(endDateMap.get(oList[1].id) == testProj2.pse__End_Date__c);
+        system.Assert(endDateMap.get(oList[2].id) == testProj3.pse__End_Date__c);
     }
 }

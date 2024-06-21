@@ -42,8 +42,9 @@ public class AceIntegrationFutureQueue implements Queueable,Database.AllowsCallo
         
         if (res.getStatusCode() == 200) {
             String jsonResponse = res.getBody();
-            System.debug('Response-' + jsonResponse);                                             
-            AceHelperMethodsV2.CRUpdateResultsHandler(jsonResponse);
+            System.debug('Response-' + jsonResponse);
+            List<OpportunityResultJSON> results = AceHelperMethodsV2.ReadCRUpdateResults(jsonResponse);                                                   
+            AceHelperMethodsV2.ProcessCRUpdateResults(results);
         }
         else if(res.getStatusCode() == 404 && retryCount < 3){
             retryCount++;

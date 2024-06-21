@@ -1,5 +1,5 @@
 public with sharing class AceUpdateBatchV2 implements Database.Batchable<SObject>, Database.Stateful, Database.AllowsCallouts, Schedulable {
-    private final String QUERY = 'SELECT id, APN_CRM_Unique_Identifier__c, AWS_Use_Case__c, CloseDate, Project_Description__c, Account.BillingPostalCode, name, Owner.Email, Owner.FirstName, Owner.LastName, Owner.Phone, stageName, Industry__c, Account.Website, Account.Name, Account.BillingCountry, Account.BillingState, Partner_Primary_Need__c, Contract_Vehicle__c, Reasons_for_loosing__c, Expected_Monthly_AWS_Revenue__c, Delivery_Model__c, Primary_Contact__r.Phone, Primary_Contact__r.FirstName, Primary_Contact__r.LastName, Primary_Contact__r.Email, Primary_Contact__r.Salutation, Acceptance_status__c, NextStep, Customer_AWS_Account_Id__c, AWS_Campaign__c, Send_to_AWS__c, AWS_Opportunity_Name__c, First_Shared_with_AWS__c, AWS_Sub_Use_Case__c, AWS_Campaign_Name__c, Is_this_Marketplace__c, Marketing_Development_Funded__c FROM Opportunity WHERE recordTypeId =: recordType AND SystemModStamp >= LAST_N_DAYS:1 AND LastModifiedById !=: integrationUser AND Send_to_AWS__c =: CMZBatch';  
+    private final String QUERY = 'SELECT id, APN_CRM_Unique_Identifier__c, AWS_Use_Case__c, CloseDate, Project_Description__c, Account.BillingPostalCode, name, Owner.Email, Owner.FirstName, Owner.LastName, Owner.Phone, stageName, Industry__c, Account.Website, Account.Name, Account.BillingCountry, Account.Country_Full_Name__c, Account.BillingState, Partner_Primary_Need__c, Contract_Vehicle__c, Reasons_for_loosing__c, Expected_Monthly_AWS_Revenue__c, Delivery_Model__c, Primary_Contact__r.Phone, Primary_Contact__r.FirstName, Primary_Contact__r.LastName, Primary_Contact__r.Email, Primary_Contact__r.Salutation, Acceptance_status__c, NextStep, Customer_AWS_Account_Id__c, AWS_Campaign__c, Send_to_AWS__c, AWS_Opportunity_Name__c, First_Shared_with_AWS__c, AWS_Sub_Use_Case__c, AWS_Campaign_Name__c, Is_this_Marketplace__c, Marketing_Development_Funded__c, Marketing_Activity_Use_Case__c, Marketing_Activity_Channel__c, Is_Opp_From_Marketing_Activity__c, AWS_SF_Campaign_Name__c, Target_Consumption_Date__c, RFX_Solicitation_Number__c FROM Opportunity WHERE recordTypeId =: recordType AND SystemModStamp >= LAST_N_DAYS:1 AND LastModifiedById !=: integrationUser AND Send_to_AWS__c =: CMZBatch' + (Test.isRunningTest()?' LIMIT 200':'');  
     private Integer settingsIndex = 0;
     private AWS__c settings;
     private String recordType;
@@ -17,6 +17,7 @@ public with sharing class AceUpdateBatchV2 implements Database.Batchable<SObject
     }
     
     public Database.QueryLocator start(Database.BatchableContext BC) { 
+        system.debug(QUERY);
         return Database.getQueryLocator(QUERY);
     }
     
@@ -27,6 +28,8 @@ public with sharing class AceUpdateBatchV2 implements Database.Batchable<SObject
     public void execute(Database.BatchableContext BC, List<Opportunity> scope) {
         List<OpportunityJSON> JSONScope = new List<OpportunityJSON>();
         
+        Map<id,date> endDateMap = AceHelperMethodsV2.GetProjectEndDates(scope);
+
         for(Opportunity opp : scope){
             if(AceHelperMethodsV2.CheckFirstShared(opp)){ 
                 opp.First_Shared_with_AWS__c = Date.Today();

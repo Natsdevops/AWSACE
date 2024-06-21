@@ -44,25 +44,32 @@ public class AceHelperMethodsV2{
       
     public static List<OpportunityJSON> ReadAWSUpdate(String jsonString){       
         List<OpportunityJSON> opps = new List<OpportunityJSON>();
+        List<String> historicalAtosAPNList = getHistoricalAtosAPNList();
         JSONParser parser = JSON.createParser(jsonString);
          
         while (parser.nextToken() != null) {
+            system.debug('Current token: ' + parser.getText());
             if (parser.getText() == 'opportunities') {            
                 while (parser.nextToken() != null) {                                    
                     if (parser.getCurrentToken() == JSONToken.START_OBJECT) {                 
                         OpportunityJSON opp = (OpportunityJSON)parser.readValueAs(OpportunityJSON.class);
+                        system.debug('Opportunity JSON: ' + opp);
+                        system.debug('CRM Identifier:' + opp.partnerCrmUniqueIdentifier);
                             if(opp.partnerCrmUniqueIdentifier != null){
-                                if(!opp.partnerCrmUniqueIdentifier.startsWith('CR')){
+                                if(!opp.partnerCrmUniqueIdentifier.startsWith('CR') && !isHistoricalAtosAPN(historicalAtosAPNList,opp) && !isAtosOpp(opp) ){
                                     System.debug('ReadAWSUpdate:' + opp); 
                                     opps.add(opp);
                                 }
                                 else{
-                                system.debug(opp.name + ' has been excluded from syncing. APN ID: ' + opp.APNCRMUniqueIdentifier);
+                                    system.debug(opp.partnerProjectTitle + ' has been excluded from syncing. APN ID: ' + opp.APNCRMUniqueIdentifier);
                                 }
                             }
-                            else{
+                            else if(!isHistoricalAtosAPN(historicalAtosAPNList,opp) && !isAtosOpp(opp)){
                                 System.debug('ReadAWSUpdate:' + opp);
                                 opps.add(opp);
+                            }
+                            else{
+                                system.debug(opp.partnerProjectTitle + ' has been excluded from syncing. APN ID: ' + opp.APNCRMUniqueIdentifier);
                             }                                                  
                     } 
                 }
@@ -78,6 +85,9 @@ public class AceHelperMethodsV2{
         List<String> InsertAPNIDsFromJSON = new List<String>();
         Map<String,Opportunity> oppMapping = new Map<String,Opportunity>();
         
+        //sorts incoming JSON by partnerCRMID
+        //if partner id is not blank, the existing opp is updated
+        //if partner id is blank, a new opp is created
         for(OpportunityJSON oppJson : opps){
             if(oppJson.partnerCrmUniqueIdentifier != null){
                 UpdateIDsFromJSON.add(oppJson.partnerCrmUniqueIdentifier);
@@ -90,6 +100,7 @@ public class AceHelperMethodsV2{
         System.debug(UpdateIDsFromJSON);
         System.debug(InsertAPNIDsFromJSON);
         
+        //query opps to be updated
         List<Opportunity> APNUpdateOpps = 
             [SELECT 
                 id, 
@@ -108,24 +119,58 @@ public class AceHelperMethodsV2{
             FROM 
                 Opportunity 
             WHERE 
-                id IN :UpdateIDsFromJSON];
+                id IN :UpdateIDsFromJSON
+            FOR UPDATE];
                 
         System.debug(APNUpdateOpps);
         
+        //query opps that correspond to an AWS updates wihtout a CRM Id
+        List<Opportunity> existingOpps = 
+            [SELECT
+                id, 
+                APN_CRM_Unique_Identifier__c, 
+                AWS_Update_Success__c, 
+                AWS_Update_Errors__c, 
+                IsClosed, 
+                OwnerId, 
+                StageName, 
+                CloseDate, 
+                First_Accepted_by_AWS__c,
+                AWS_Acceptance_Status__c, 
+                AWS_Launched_Date__c, 
+                AWS_Sub_Use_Case__c, 
+                AWS_Closed_Lost_Date__c
+            FROM    
+                Opportunity
+            WHERE
+                APN_CRM_Unique_Identifier__c IN :InsertAPNIDsFromJSON
+            FOR UPDATE
+            ];
+
+        System.debug(existingOpps);
+
         List<String> queriedIds = new List<String>();
-        
+
+        //store Ids  of  opps to be updated
         for(Opportunity o : APNUpdateOpps){
+            queriedIds.add(o.id);
+        }
+
+        for(Opportunity o : existingOpps){
             queriedIds.add(o.id);
         }
         
         List<String> UpdateAPNIDsFromJSON = new List<String>();
         
+        //if the opportunity query doesn't return every record from the AWS update
+        //add the APN id to a separate list
         for(OpportunityJSON oppJson : opps){
             if(!queriedIds.contains(oppJson.partnerCrmUniqueIdentifier)){
                 UpdateAPNIDsFromJSON.add(oppJson.APNCRMUniqueIdentifier);
             }
         }
         
+        //select Opps that should be updated based in their APN id (sfdc id does not match AWS update)
         List<Opportunity> APNUpdateOpps2 = 
             [SELECT 
                 id, 
@@ -144,10 +189,12 @@ public class AceHelperMethodsV2{
             FROM 
                 Opportunity 
             WHERE 
-                APN_CRM_Unique_Identifier__c IN :UpdateAPNIDsFromJSON];
+                APN_CRM_Unique_Identifier__c IN :UpdateAPNIDsFromJSON
+            FOR UPDATE];
         
         system.debug(APNUpdateOpps2);
         
+        //maps APN id to existing sfdc opportunity that matches the CRM Id from the AWS update
         for(OpportunityJSON oppJson : opps){
             if(oppJson.partnerCrmUniqueIdentifier != null && queriedIds.contains(oppJson.partnerCrmUniqueIdentifier)){
                 for(Opportunity o : APNUpdateOpps){
@@ -156,7 +203,8 @@ public class AceHelperMethodsV2{
                     }
                 }                   
             }
-            else if(oppJson.partnerCrmUniqueIdentifier != null && UpdateAPNIDsFromJSON.contains(oppJson.APNCRMUniqueIdentifier)){
+            //maps APN Id to an existing opportunity that did not correspond
+            else if(oppJson.partnerCrmUniqueIdentifier == null && UpdateAPNIDsFromJSON.contains(oppJson.APNCRMUniqueIdentifier)){
                 for(Opportunity o : APNUpdateOpps2){
                     if(o.APN_CRM_Unique_Identifier__c == oppJson.APNCRMUniqueIdentifier){
                         oppMapping.put(oppJson.APNCRMUniqueIdentifier,o);
@@ -164,7 +212,9 @@ public class AceHelperMethodsV2{
                 }  
             }
             else{
-                oppMapping.put(oppJson.APNCRMUniqueIdentifier,new Opportunity());    
+                if(!UpdateAPNIDsFromJSON.contains(oppJson.APNCRMUniqueIdentifier)){
+                    oppMapping.put(oppJson.APNCRMUniqueIdentifier,new Opportunity());   
+                }
             }
         }
         System.debug('Create APN Id to Opp Mapping:' + oppMapping);
@@ -175,15 +225,13 @@ public class AceHelperMethodsV2{
         List<Opportunity> upsertList = new List<Opportunity>();
         
         for(OpportunityJSON json : opps){
-            Opportunity o = APNtoOppMapping.get(json.APNCRMUniqueIdentifier);
-            
-            if(o == null){
-                o = new Opportunity();
-            }
-            
+            system.debug(json.APNCRMUniqueIdentifier);
+            Opportunity o = APNtoOppMapping.get(json.APNCRMUniqueIdentifier);          
             System.debug(o);
             
-            if(json.partnerCrmUniqueIdentifier == null){
+            if(json.partnerCrmUniqueIdentifier == null && o == null){
+                             
+                o = new Opportunity();
                 
                 if(CheckFirstLaunched(o,json)){
                     o.AWS_Launched_Date__c = Date.Today();
@@ -201,6 +249,7 @@ public class AceHelperMethodsV2{
                 o.APN_CRM_Unique_Identifier__c = json.APNCRMUniqueIdentifier;
                 o.AWS_Use_Case__c = json.useCase;
                 o.CloseDate = date.valueOf(json.targetCloseDate);
+                o.Target_Consumption_Date__c = date.valueOf(json.targetCloseDate);
                 o.stageName = AceHelperMethodsV2.ConvertStage(json);
                 o.Project_Description__c = json.projectDescription;                
                 o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
@@ -216,7 +265,12 @@ public class AceHelperMethodsV2{
                 o.AWS_Customer_Email__c = json.customerEmail;
                 o.AWS_Customer_Phone__c = json.customerPhone;
                 o.nextStep = json.nextStep;
-                o.AWS_Sub_Use_Case__c = json.subUseCase;                                                         
+                o.AWS_Sub_Use_Case__c = json.subUseCase; 
+                o.Is_Opp_From_Marketing_Activity__c = json.IsOppFromMarketingActivity;
+                o.Marketing_Activity_Channel__c = json.marketingActivityChannel;
+                o.Marketing_Activity_Use_Case__c = json.marketingActivityUsecase;
+                o.AWS_SF_Campaign_Name__c = json.awsSFCampaignName;
+                o.RFX_Solicitation_Number__c = json.rfxSolicitationNumber;                                                        
             }
             else if(AceHelperMethodsV2.AllowAWSUpdates(o)){ 
                 
@@ -239,7 +293,6 @@ public class AceHelperMethodsV2{
                  
                 o.APN_CRM_Unique_Identifier__c = json.APNCRMUniqueIdentifier;             
                 o.AWS_Use_Case__c = json.useCase;
-                o.Name = CheckNameLength(json);
                 o.Project_Description__c = json.projectDescription;
                 o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
                 o.industry__c = json.industry;
@@ -255,7 +308,9 @@ public class AceHelperMethodsV2{
                 o.AWS_Customer_Email__c = json.customerEmail;
                 o.AWS_Customer_Phone__c = json.customerPhone;
                 o.nextStep = json.nextStep;
-                o.AWS_Sub_Use_Case__c = json.subUseCase;                
+                o.AWS_Sub_Use_Case__c = json.subUseCase; 
+                o.Target_Consumption_Date__c = date.valueOf(json.targetCloseDate); 
+                o.RFX_Solicitation_Number__c = json.rfxSolicitationNumber;              
             }
             upsertList.add(o);          
         }       
@@ -318,7 +373,7 @@ public class AceHelperMethodsV2{
         oppJSON.stage = AceHelperMethodsV2.ConvertStage(o);            
         oppJSON.APNCRMUniqueIdentifier = o.APN_CRM_Unique_Identifier__c;                 
         oppJSON.useCase = o.AWS_Use_Case__c;
-        oppJSON.targetCloseDate = String.valueOf(o.CloseDate);
+        oppJSON.targetCloseDate = String.valueOf(o.Target_Consumption_Date__c);
         oppJSON.projectDescription = o.Project_Description__c;
         oppJSON.primaryContactEmail = o.Owner.Email;
         //function to convert billing countrty code
@@ -330,7 +385,7 @@ public class AceHelperMethodsV2{
         oppJSON.deliveryModel = o.Delivery_Model__c;
         oppJSON.customerWebsite = o.Account.Website;
         oppJSON.customerCompanyName = o.Account.Name;
-        oppJSON.country = o.Account.BillingCountry;
+        oppJSON.country = o.Account.Country_Full_Name__c;
         oppJSON.contractVehicle = o.Contract_Vehicle__c;
         oppJSON.closedLostReason = o.Reasons_for_loosing__c;
         //function to convert state
@@ -351,8 +406,32 @@ public class AceHelperMethodsV2{
         oppJSON.campaignName = String.ValueOf(o.AWS_Campaign_Name__c); 
         oppJSON.isMarketingDevelopmentFunded = String.ValueOf(o.Marketing_Development_Funded__c);
         oppJSON.isThisForMarketplace = String.ValueOf(o.Is_this_Marketplace__c);
+        oppJSON.IsOppFromMarketingActivity = String.valueOf(o.Is_Opp_From_Marketing_Activity__c);
+        oppJSON.marketingActivityChannel = String.valueOf(o.Marketing_Activity_Channel__c);
+        oppJSON.marketingActivityUsecase = String.valueOf(o.Marketing_Activity_Use_Case__c);
+        oppJSON.awsSFCampaignName = o.AWS_SF_Campaign_Name__c;
+        oppJSON.rfxSolicitationNumber = o.RFX_Solicitation_Number__c;
         System.debug('Prepare JSON Request:' + oppJSON);    
         return oppJSON;
+    }
+
+    public static Map<id,date> GetProjectEndDates(List<Opportunity> oList){
+
+        List<ID> OppIds = new List<ID>();
+
+        for(Opportunity o : oList){
+            OppIds.add(o.id);    
+        }
+
+        List<pse__Proj__c> projectList = [SELECT id, pse__End_Date__c, pse__Opportunity__c  FROM pse__Proj__c WHERE pse__Opportunity__c IN :OppIds AND (NOT Name LIKE 'PS%') AND (NOT Name LIKE '%Funding%')];
+        
+        Map<id,date> endDateMap = new Map<id,date>();
+
+        for(pse__Proj__c p : projectList){
+            endDateMap.put(p.pse__Opportunity__c,p.pse__End_Date__c);
+        }
+        
+        return endDateMap;
     }
     
     @future
@@ -485,7 +564,12 @@ public class AceHelperMethodsV2{
                 }
             }
             when 'Order Validated'{
+                if(o.Customer_AWS_Account_Id__c != null){
                     convertedStage = 'Launched';
+                }
+                else{
+                    convertedStage = 'Committed';
+                }
             }
             when 'Closed Lost'{
                 convertedStage = 'Closed Lost';
@@ -618,7 +702,32 @@ public class AceHelperMethodsV2{
         System.debug('Check First Closed Lost:' + firstClosedLost);
         return firstClosedLost;
     }
-    
+
+    public static List<String> getHistoricalAtosAPNList(){
+        List<String> HistoricalAPNIds = new List<String>();
+        StaticResource sr = [SELECT Id, Body FROM StaticResource WHERE Name = 'AceHistoricalAtosAPN' LIMIT 1];
+        JSONParser parser = JSON.createParser(sr.Body.toString());
+        while (parser.nextToken() != null) {
+            if (parser.getCurrentToken() == JSONToken.START_ARRAY) {
+                HistoricalAPNIds = (List<String>) parser.readValueAs(List<string>.Class);
+            }
+        }
+        system.debug(HistoricalAPNIds);
+        return HistoricalAPNIds;
+    }
+
+    public static Boolean isHistoricalAtosAPN(List<String> historicalList, OpportunityJSON opp){
+        Boolean isHistoricalAtos = historicalList.contains(opp.APNCRMUniqueIdentifier);
+        system.debug('isHistoricalAtos: ' + isHistoricalAtos);
+        return isHistoricalAtos;
+    }
+
+    public static Boolean isAtosOpp(OpportunityJSON opp){
+        Boolean isAtosOpp = opp.partnerProjectTitle.startsWith('#Eviden');
+        system.debug('isAtosOpp: ' + isAtosOpp);
+        return isAtosOpp;
+    }
+  
 //---------------------------------API REQUESTS ----------------------------------------      
             
     public static String PutCRUpdateCallout(AWS__c settings, List<OpportunityJSON> oppJSONScope){
