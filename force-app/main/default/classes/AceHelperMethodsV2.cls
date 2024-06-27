@@ -1,7 +1,7 @@
 public class AceHelperMethodsV2{   
 
 //---------------------------------CORE FUNCTIONS------------------------------------------    
-    
+/*    
     public static AWS__c CheckIntegrationType(String jsonString){
         AWS__c setting;
         JSONParser parser = JSON.createParser(jsonString);    
@@ -337,7 +337,8 @@ public class AceHelperMethodsV2{
         system.debug('Query Upserted Opps:' + upsertedOpps);                
         return upsertedOpps;
     }
-*/    
+*/
+/*    
     public static void ProcessUpsertResults(Map<Database.UpsertResult,String> resultMap, AWS__c settings){
         List<AWS_Integration_Log__c> logs = new List<AWS_Integration_Log__c>();        
         
@@ -727,24 +728,24 @@ public class AceHelperMethodsV2{
         system.debug('isAtosOpp: ' + isAtosOpp);
         return isAtosOpp;
     }
-  
+*/  
 //---------------------------------API REQUESTS ----------------------------------------      
             
-    public static String PutCRUpdateCallout(AWS__c settings, List<OpportunityJSON> oppJSONScope){
+    public static String PutCRUpdateCallout(PartnerIntegration__mdt mdt, List<OpportunityJSON> oppJSONScope){
         Map<String,Object> OppMap = new Map<String,Object>();
         OppMap.put('opportunities',oppJSONScope);
         OppMap.put('version','1');
-        OppMap.put('spmsId',settings.spmsId__c);
+        OppMap.put('spmsId','1450');
                     
         String finalJSON = JSON.serialize(OppMap);
         
         Http http = new Http();
         HttpRequest req = new HttpRequest(); 
 
-        String user = settings.AWS_User__c;
-        String pass = settings.AWS_Password__c;
-        String region = settings.AWS_Region__c;
-        String bucketName = settings.AWS_Bucket__c;
+        String user = mdt.Username__c;
+        String pass = mdt.Password__c;
+        String region = mdt.AWS_Region__c;
+        String bucketName = mdt.AWS_Bucket__c;
         
         String endPointURL = 'https://s3.'+ region +'.amazonaws.com/' + bucketName + '/opportunity-inbound/';
         String filename = 'OpportunityBatch';
@@ -768,7 +769,7 @@ public class AceHelperMethodsV2{
         if (res.getStatusCode() == 200) {
             processedPath += '_result.json';
             }
-        System.debug('CR UPdate Callout:' + processedPath);    
+        System.debug('CR Update Callout:' + processedPath);    
         return processedPath;
     }   
 }

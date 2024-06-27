@@ -1,3 +1,6 @@
+/*USE PARTNER INTEGRATION API
+
+
 @RestResource(urlMapping='/ace/api/v2/read')
 global with sharing class AceReadAPIv2 { 
 
@@ -15,3 +18,4 @@ global with sharing class AceReadAPIv2 {
         AceHelperMethodsV2.ProcessUpsertResults(results,setting);
    }         
 }
+*/
