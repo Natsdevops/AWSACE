@@ -71,35 +71,35 @@ def lambda_handler(event, context):
                     )
                     print(s3_object_response)
                 if is_previously_read is False:
-                	print(object_key)
-                	s3_object_response = s3_client.get_object(
+                    print(object_key)
+                    s3_object_response = s3_client.get_object(
                     	Bucket=bucket_name,
                     	Key=object_key
                 	)
-                	print(s3_object_response)
-                	print(s3_object_response.get('ContentLength')) # Size of the body in bytes.
-                	body_data = s3_object_response['Body'].read().decode('utf-8')               
-                	print(body_data)
+                print(s3_object_response)
+                print(s3_object_response.get('ContentLength')) # Size of the body in bytes.
+                body_data = s3_object_response['Body'].read().decode('utf-8')               
+                print(body_data)
                 	#send body data to target system               
                 
-                	sf = jwt_login('3MVG9HoFrxrSzmIyvUKkKbAdXMeUx7sekjwntxJrV2iJVrLRVS0NQlbqdMAf.XlZQo8cvn4g9.1gTpV9OZmJA', 'a854599@atos.net.indirect', True)
-                	print('making sfdc api request...')
-                	result = sf.apexecute('/partnerIntegration/api/v1/read', method='PUT', data=body_data)
+                sf = jwt_login('3MVG9HoFrxrSzmIyvUKkKbAdXMeUx7sekjwntxJrV2iJVrLRVS0NQlbqdMAf.XlZQo8cvn4g9.1gTpV9OZmJA', 'a854599@atos.net.indirect', True)
+                print('making sfdc api request...')
+                result = sf.apexecute('/partnerIntegration/api/v1/inbound/aws', method='PUT', data=body_data)
                                
                 	# partner can tag object as processed
-                	response = s3_client.put_object_tagging(
-                    	Bucket=bucket_name,
-                    	Key=object_key,
-                    	Tagging={
-                        	'TagSet': [
-                            	{
-                                	'Key': 'partner_processed',
-                                	'Value': 'true'
-                            	},
-                        	]
-                    	}
-                	)
-                	print(response)
+                response = s3_client.put_object_tagging(
+                    Bucket=bucket_name,
+                    Key=object_key,
+                    Tagging={
+                        'TagSet': [
+                            {
+                                'Key': 'partner_processed',
+                                'Value': 'true'
+                            },
+                        ]
+                    }
+                )
+                print(response)
         return {
             'statusCode': 200,
             'body': json.dumps('success')
