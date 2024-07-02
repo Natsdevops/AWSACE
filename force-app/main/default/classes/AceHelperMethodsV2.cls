@@ -1,7 +1,8 @@
 public class AceHelperMethodsV2{   
 
 //---------------------------------CORE FUNCTIONS------------------------------------------    
-/*    
+/*  
+    //update to simple query the AWS metadata
     public static AWS__c CheckIntegrationType(String jsonString){
         AWS__c setting;
         JSONParser parser = JSON.createParser(jsonString);    
@@ -23,7 +24,7 @@ public class AceHelperMethodsV2{
         System.debug('Check integration Type:' + setting);
         return setting;
     }
-    
+    //likely unnecessary
     public static AWS__c CheckIntegrationType(Integer integrationType){
         AWS__c setting;
         
@@ -41,7 +42,7 @@ public class AceHelperMethodsV2{
         System.debug('Check integration Type:' + setting);
         return setting;
     }
-      
+    //will need to exclude historical CR opps or connected them via reference 1  
     public static List<OpportunityJSON> ReadAWSUpdate(String jsonString){       
         List<OpportunityJSON> opps = new List<OpportunityJSON>();
         List<String> historicalAtosAPNList = getHistoricalAtosAPNList();
@@ -79,7 +80,7 @@ public class AceHelperMethodsV2{
         } 
         return opps;           
     }     
-    
+    //should distinguish between eviden opps and historical CR opps
     public static Map<String,Opportunity> CreateAPNIdtoOppMapping(List<OpportunityJSON> opps){        
         List<String> UpdateIDsFromJSON = new List<String>();
         List<String> InsertAPNIDsFromJSON = new List<String>();
@@ -366,56 +367,56 @@ public class AceHelperMethodsV2{
         System.debug('Process Upsert Results:' + logs);
         Insert logs;    
     }
-    
+*/    
     public static OpportunityJSON PrepareJSONRequest(Opportunity o){
         OpportunityJSON oppJSON = new OpportunityJSON();
         oppJSON.name = o.name;
-        oppJSON.partnerProjectTitle = AceHelperMethodsV2.CheckAWSName(o); 
-        oppJSON.stage = AceHelperMethodsV2.ConvertStage(o);            
+        //oppJSON.partnerProjectTitle = AceHelperMethodsV2.CheckAWSName(o); 
+        //oppJSON.stage = AceHelperMethodsV2.ConvertStage(o);            
         oppJSON.APNCRMUniqueIdentifier = o.APN_CRM_Unique_Identifier__c;                 
-        oppJSON.useCase = o.AWS_Use_Case__c;
+        //oppJSON.useCase = o.AWS_Use_Case__c;
         oppJSON.targetCloseDate = String.valueOf(o.Target_Consumption_Date__c);
-        oppJSON.projectDescription = o.Project_Description__c;
+        //oppJSON.projectDescription = o.Project_Description__c;
         oppJSON.primaryContactEmail = o.Owner.Email;
         //function to convert billing countrty code
         oppJSON.postalCode = o.Account.BillingPostalCode;           
         oppJSON.partnerPrimaryNeedFromAws = o.Partner_Primary_Need__c;            
         oppJSON.partnerCrmUniqueIdentifier = o.id;
-        oppJSON.industry = o.industry__c;
+        //oppJSON.industry = o.industry__c;
         oppJSON.expectedMonthlyAwsRevenue = (Integer) o.Expected_Monthly_AWS_Revenue__c;
         oppJSON.deliveryModel = o.Delivery_Model__c;
         oppJSON.customerWebsite = o.Account.Website;
         oppJSON.customerCompanyName = o.Account.Name;
-        oppJSON.country = o.Account.Country_Full_Name__c;
+        //oppJSON.country = o.Account.Country_Full_Name__c;
         oppJSON.contractVehicle = o.Contract_Vehicle__c;
-        oppJSON.closedLostReason = o.Reasons_for_loosing__c;
+        //oppJSON.closedLostReason = o.Reasons_for_loosing__c;
         //function to convert state
         oppJSON.state = o.Account.BillingState;
         oppJSON.primaryContactLastName = o.Owner.LastName;
         oppJSON.primaryContactFirstName = o.Owner.FirstName;
         oppJSON.primaryContactPhone = o.Owner.Phone;
-        oppJSON.customerTitle = o.Primary_Contact__r.Salutation;
-        oppJSON.customerPhone = o.Primary_Contact__r.Phone;
-        oppJSON.customerLastName = o.Primary_Contact__r.LastName;
-        oppJSON.customerFirstName = o.Primary_Contact__r.FirstName;
-        oppJSON.customerEmail = o.Primary_Contact__r.Email;
+        //oppJSON.customerTitle = o.Primary_Contact__r.Salutation;
+        //oppJSON.customerPhone = o.Primary_Contact__r.Phone;
+        //oppJSON.customerLastName = o.Primary_Contact__r.LastName;
+        //oppJSON.customerFirstName = o.Primary_Contact__r.FirstName;
+        //oppJSON.customerEmail = o.Primary_Contact__r.Email;
         oppJSON.partnerAcceptanceStatus = o.Acceptance_status__c;
         oppJSON.nextStep = o.NextStep;
         oppJSON.awsAccountId = o.Customer_AWS_Account_Id__c;
         oppJSON.additionalComments = o.AWS_Campaign__c;
-        oppJSON.subUseCase = o.AWS_Sub_Use_Case__c;
-        oppJSON.campaignName = String.ValueOf(o.AWS_Campaign_Name__c); 
-        oppJSON.isMarketingDevelopmentFunded = String.ValueOf(o.Marketing_Development_Funded__c);
-        oppJSON.isThisForMarketplace = String.ValueOf(o.Is_this_Marketplace__c);
+        //oppJSON.subUseCase = o.AWS_Sub_Use_Case__c;
+        //oppJSON.campaignName = String.ValueOf(o.AWS_Campaign_Name__c); 
+        //oppJSON.isMarketingDevelopmentFunded = String.ValueOf(o.Marketing_Development_Funded__c);
+        //oppJSON.isThisForMarketplace = String.ValueOf(o.Is_this_Marketplace__c);
         oppJSON.IsOppFromMarketingActivity = String.valueOf(o.Is_Opp_From_Marketing_Activity__c);
         oppJSON.marketingActivityChannel = String.valueOf(o.Marketing_Activity_Channel__c);
         oppJSON.marketingActivityUsecase = String.valueOf(o.Marketing_Activity_Use_Case__c);
         oppJSON.awsSFCampaignName = o.AWS_SF_Campaign_Name__c;
-        oppJSON.rfxSolicitationNumber = o.RFX_Solicitation_Number__c;
+        //oppJSON.rfxSolicitationNumber = o.RFX_Solicitation_Number__c;
         System.debug('Prepare JSON Request:' + oppJSON);    
         return oppJSON;
     }
-
+/*
     public static Map<id,date> GetProjectEndDates(List<Opportunity> oList){
 
         List<ID> OppIds = new List<ID>();
@@ -631,7 +632,7 @@ public class AceHelperMethodsV2{
         System.debug('Allow Stage and Close Date Updates:' + allowUpdates);
         return allowUpdates;
     }
-    
+    //not necessary
     public static String CheckNameLength(OpportunityJSON json){
         String name = '';
         if(json.partnerProjectTitle != null){
@@ -645,7 +646,7 @@ public class AceHelperMethodsV2{
         }
         return name;
     }
-    
+    //not necessary
     public static String CheckAWSName(Opportunity o){
         String name = '';
                
@@ -722,7 +723,7 @@ public class AceHelperMethodsV2{
         system.debug('isHistoricalAtos: ' + isHistoricalAtos);
         return isHistoricalAtos;
     }
-
+    //check in with Svetlana about process
     public static Boolean isAtosOpp(OpportunityJSON opp){
         Boolean isAtosOpp = opp.partnerProjectTitle.startsWith('#Eviden');
         system.debug('isAtosOpp: ' + isAtosOpp);
