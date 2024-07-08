@@ -1,48 +1,24 @@
 public class AceHelperMethodsV2{   
 
 //---------------------------------CORE FUNCTIONS------------------------------------------    
-/*  
-    //update to simple query the AWS metadata
-    public static AWS__c CheckIntegrationType(String jsonString){
-        AWS__c setting;
-        JSONParser parser = JSON.createParser(jsonString);    
-               
-        while (parser.nextToken() != null) {
-            if (parser.getText() == 'spmsId'){
-                parser.nextToken();                 
-                if(parser.getText() == '1450'){
-                    setting = AWS__c.getValues('AWS Integration Settings');
-                }
-                else if(parser.getText() == '5896'){
-                    setting = AWS__c.getValues('AWS CMZ Integration Settings');  
-                }
-                else{
-                    System.debug('No Matching spmsID');
-                }
-            }        
-        }
-        System.debug('Check integration Type:' + setting);
-        return setting;
+ 
+    //update to simply query the AWS metadata
+    public static PartnerIntegration__mdt GetIntegrationMetadata(){
+        PartnerIntegration__mdt mdt = 
+                                    [SELECT 
+                                            AWS_Bucket__c, 
+                                            AWS_Region__c, 
+                                            Integration_Account__c, 
+                                            Integration_User_Id__c,
+                                            Partner_Name__c,
+                                            Password__c,
+                                            Username__c
+                                    FROM PartnerIntegration__mdt
+                                    WHERE Partner_Name__c = 'AWS'];
+        return mdt;
     }
-    //likely unnecessary
-    public static AWS__c CheckIntegrationType(Integer integrationType){
-        AWS__c setting;
-        
-        switch on integrationType{
-            when 0{
-                setting = AWS__c.getValues('AWS Integration Settings');
-            }
-            when 1{
-                setting = AWS__c.getValues('AWS CMZ Integration Settings');
-            }
-            when else{
-                system.debug('No integration setting found'); 
-            }
-        }
-        System.debug('Check integration Type:' + setting);
-        return setting;
-    }
-    //will need to exclude historical CR opps or connected them via reference 1  
+    /*
+    //will need to exclude historical CR opps or connect them via reference 1  
     public static List<OpportunityJSON> ReadAWSUpdate(String jsonString){       
         List<OpportunityJSON> opps = new List<OpportunityJSON>();
         List<String> historicalAtosAPNList = getHistoricalAtosAPNList();
@@ -732,7 +708,7 @@ public class AceHelperMethodsV2{
 */  
 //---------------------------------API REQUESTS ----------------------------------------      
             
-    public static String PutCRUpdateCallout(PartnerIntegration__mdt mdt, List<OpportunityJSON> oppJSONScope){
+    public static String PutUpdateCallout(List<OpportunityJSON> oppJSONScope){
         Map<String,Object> OppMap = new Map<String,Object>();
         OppMap.put('opportunities',oppJSONScope);
         OppMap.put('version','1');
@@ -743,6 +719,7 @@ public class AceHelperMethodsV2{
         Http http = new Http();
         HttpRequest req = new HttpRequest(); 
 
+        PartnerIntegration__mdt mdt = GetIntegrationMetadata();
         String user = mdt.Username__c;
         String pass = mdt.Password__c;
         String region = mdt.AWS_Region__c;
