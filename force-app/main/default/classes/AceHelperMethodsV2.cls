@@ -55,32 +55,31 @@ public class AceHelperMethodsV2{
             
         } 
         return opps;           
-    }     
-    //should distinguish between eviden opps and historical CR opps
+    } 
+    */        
     public static Map<String,Opportunity> CreateAPNIdtoOppMapping(List<OpportunityJSON> opps){        
-        List<String> UpdateIDsFromJSON = new List<String>();
-        List<String> InsertAPNIDsFromJSON = new List<String>();
+        List<String> AtosIdsFromJSON = new List<String>();
+        List<String> ApnIdsFromJSON = new List<String>();
         Map<String,Opportunity> oppMapping = new Map<String,Opportunity>();
         
-        //sorts incoming JSON by partnerCRMID
-        //if partner id is not blank, the existing opp is updated
-        //if partner id is blank, a new opp is created
+        //sorts inbound JSON by whether partner CRM ID (Atos Opportunity Id) is blank
         for(OpportunityJSON oppJson : opps){
             if(oppJson.partnerCrmUniqueIdentifier != null){
-                UpdateIDsFromJSON.add(oppJson.partnerCrmUniqueIdentifier);
+                AtosIdsFromJSON.add(oppJson.partnerCrmUniqueIdentifier);
             }
             else{
-               InsertAPNIDsFromJSON.add(oppJson.APNCRMUniqueIdentifier); 
+                ApnIdsFromJSON.add(oppJson.APNCRMUniqueIdentifier); 
             }
         }
         
-        System.debug(UpdateIDsFromJSON);
-        System.debug(InsertAPNIDsFromJSON);
+        System.debug(AtosIdsFromJSON);
+        System.debug(APNIDsFromJSON);
         
-        //query opps to be updated
-        List<Opportunity> APNUpdateOpps = 
+        //query opportunity by Atos Opportunity Id
+        List<Opportunity> AtosIdMatchedOpps = 
             [SELECT 
-                id, 
+                id,
+                Opportunity_ID__c, 
                 APN_CRM_Unique_Identifier__c, 
                 AWS_Update_Success__c, 
                 AWS_Update_Errors__c, 
@@ -96,15 +95,15 @@ public class AceHelperMethodsV2{
             FROM 
                 Opportunity 
             WHERE 
-                id IN :UpdateIDsFromJSON
-            FOR UPDATE];
-                
-        System.debug(APNUpdateOpps);
-        
-        //query opps that correspond to an AWS updates wihtout a CRM Id
-        List<Opportunity> existingOpps = 
+                Opportunity_ID__c IN :AtosIdsFromJSON
+            FOR UPDATE];        
+        System.debug(AtosIdMatchedOpps);
+
+        //query opp by APN Id
+        List<Opportunity> ApnIdMatchedOpps = 
             [SELECT
                 id, 
+                Opportunity_ID__c,
                 APN_CRM_Unique_Identifier__c, 
                 AWS_Update_Success__c, 
                 AWS_Update_Errors__c, 
@@ -120,76 +119,45 @@ public class AceHelperMethodsV2{
             FROM    
                 Opportunity
             WHERE
-                APN_CRM_Unique_Identifier__c IN :InsertAPNIDsFromJSON
+                APN_CRM_Unique_Identifier__c IN :ApnIdsFromJSON
             FOR UPDATE
             ];
 
-        System.debug(existingOpps);
+        System.debug(ApnIdMatchedOpps);
 
-        List<String> queriedIds = new List<String>();
+        List<String> queriedAtosIds = new List<String>();
+        List<String> queriedApnIds = new List<String>();
 
-        //store Ids  of  opps to be updated
-        for(Opportunity o : APNUpdateOpps){
-            queriedIds.add(o.id);
+        //store list of Atos Ids that already exist on an opportunity 
+        //**** if an json update has a crm partner id populated, the record should always exist because deletion is not allowed
+        for(Opportunity o : AtosIdMatchedOpps){
+            queriedAtosIds.add(o.Opportunity_ID__c);
         }
-
-        for(Opportunity o : existingOpps){
-            queriedIds.add(o.id);
+        //store list of APN Ids that already exist on an opportunity
+        for(Opportunity o : ApnIdMatchedOpps){
+            queriedApnIds.add(o.APN_CRM_Unique_Identifier__c);
         }
-        
-        List<String> UpdateAPNIDsFromJSON = new List<String>();
-        
-        //if the opportunity query doesn't return every record from the AWS update
-        //add the APN id to a separate list
-        for(OpportunityJSON oppJson : opps){
-            if(!queriedIds.contains(oppJson.partnerCrmUniqueIdentifier)){
-                UpdateAPNIDsFromJSON.add(oppJson.APNCRMUniqueIdentifier);
-            }
-        }
-        
-        //select Opps that should be updated based in their APN id (sfdc id does not match AWS update)
-        List<Opportunity> APNUpdateOpps2 = 
-            [SELECT 
-                id, 
-                APN_CRM_Unique_Identifier__c, 
-                AWS_Update_Success__c, 
-                AWS_Update_Errors__c, 
-                IsClosed, 
-                OwnerId, 
-                StageName, 
-                CloseDate, 
-                First_Accepted_by_AWS__c,
-                AWS_Acceptance_Status__c, 
-                AWS_Launched_Date__c, 
-                AWS_Sub_Use_Case__c, 
-                AWS_Closed_Lost_Date__c 
-            FROM 
-                Opportunity 
-            WHERE 
-                APN_CRM_Unique_Identifier__c IN :UpdateAPNIDsFromJSON
-            FOR UPDATE];
-        
-        system.debug(APNUpdateOpps2);
         
         //maps APN id to existing sfdc opportunity that matches the CRM Id from the AWS update
         for(OpportunityJSON oppJson : opps){
-            if(oppJson.partnerCrmUniqueIdentifier != null && queriedIds.contains(oppJson.partnerCrmUniqueIdentifier)){
-                for(Opportunity o : APNUpdateOpps){
-                    if(o.id == oppJson.partnerCrmUniqueIdentifier){
+            if(oppJson.partnerCrmUniqueIdentifier != null && queriedAtosIds.contains(oppJson.partnerCrmUniqueIdentifier)){
+                for(Opportunity o : AtosIdMatchedOpps){
+                    if(o.Opportunity_ID__c == oppJson.partnerCrmUniqueIdentifier){
                         oppMapping.put(oppJson.APNCRMUniqueIdentifier,o);
                     }
                 }                   
             }
-            //maps APN Id to an existing opportunity that did not correspond
-            else if(oppJson.partnerCrmUniqueIdentifier == null && UpdateAPNIDsFromJSON.contains(oppJson.APNCRMUniqueIdentifier)){
-                for(Opportunity o : APNUpdateOpps2){
+            //maps APN Id to an existing opportunity that matches APN Id
+            else if(oppJson.partnerCrmUniqueIdentifier == null && queriedApnIds.contains(oppJson.APNCRMUniqueIdentifier)){
+                for(Opportunity o : ApnIdMatchedOpps){
                     if(o.APN_CRM_Unique_Identifier__c == oppJson.APNCRMUniqueIdentifier){
                         oppMapping.put(oppJson.APNCRMUniqueIdentifier,o);
                     }
                 }  
             }
+            //if no match exists (neither Atos Opportunity ID or APN Id), map APN Id to new opportunity
             else{
-                if(!UpdateAPNIDsFromJSON.contains(oppJson.APNCRMUniqueIdentifier)){
+                if(!queriedApnIds.contains(oppJson.APNCRMUniqueIdentifier)){
                     oppMapping.put(oppJson.APNCRMUniqueIdentifier,new Opportunity());   
                 }
             }
@@ -197,7 +165,7 @@ public class AceHelperMethodsV2{
         System.debug('Create APN Id to Opp Mapping:' + oppMapping);
         return oppMapping;        
     }    
-    
+    /*
     public static Map<Database.UpsertResult,String> UpsertOpps(Map<String,Opportunity> APNtoOppMapping,List<OpportunityJSON> opps,AWS__c settings){
         List<Opportunity> upsertList = new List<Opportunity>();
         
@@ -346,8 +314,8 @@ public class AceHelperMethodsV2{
 */    
     public static OpportunityJSON PrepareJSONRequest(Opportunity o){
         OpportunityJSON oppJSON = new OpportunityJSON();
-        oppJSON.name = o.name;
-        //oppJSON.partnerProjectTitle = AceHelperMethodsV2.CheckAWSName(o); 
+        oppJSON.name = o.Name;
+        //oppJSON.partnerProjectTitle = o.Name; 
         //oppJSON.stage = AceHelperMethodsV2.ConvertStage(o);            
         oppJSON.APNCRMUniqueIdentifier = o.APN_CRM_Unique_Identifier__c;                 
         oppJSON.useCase = o.AWS_Use_Case__c;
@@ -371,11 +339,11 @@ public class AceHelperMethodsV2{
         oppJSON.primaryContactLastName = o.Owner.LastName;
         oppJSON.primaryContactFirstName = o.Owner.FirstName;
         oppJSON.primaryContactPhone = o.Owner.Phone;
-        //oppJSON.customerTitle = o.Primary_Contact__r.Salutation;
-        //oppJSON.customerPhone = o.Primary_Contact__r.Phone;
-        //oppJSON.customerLastName = o.Primary_Contact__r.LastName;
+        oppJSON.customerTitle = o.Main_Contact__c__r.Salutation;
+        oppJSON.customerPhone = o.Main_Contact__c__r.Phone;
+        oppJSON.customerLastName = o.Main_Contact__c__r.LastName;
         oppJSON.customerFirstName = o.Main_Contact__c;
-        //oppJSON.customerEmail = o.Primary_Contact__r.Email;
+        oppJSON.customerEmail = o.Main_Contact__c__r.Email;
         oppJSON.partnerAcceptanceStatus = o.Acceptance_status__c;
         oppJSON.nextStep = o.NextStep;
         oppJSON.awsAccountId = o.Customer_AWS_Account_Id__c;
