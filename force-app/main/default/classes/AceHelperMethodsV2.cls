@@ -314,8 +314,8 @@ public class AceHelperMethodsV2{
 */    
     public static OpportunityJSON PrepareJSONRequest(Opportunity o){
         OpportunityJSON oppJSON = new OpportunityJSON();
-        oppJSON.name = o.name;
-        //oppJSON.partnerProjectTitle = AceHelperMethodsV2.CheckAWSName(o); 
+        oppJSON.name = o.Name;
+        //oppJSON.partnerProjectTitle = o.Name; 
         //oppJSON.stage = AceHelperMethodsV2.ConvertStage(o);            
         oppJSON.APNCRMUniqueIdentifier = o.APN_CRM_Unique_Identifier__c;                 
         oppJSON.useCase = o.AWS_Use_Case__c;
@@ -339,11 +339,11 @@ public class AceHelperMethodsV2{
         oppJSON.primaryContactLastName = o.Owner.LastName;
         oppJSON.primaryContactFirstName = o.Owner.FirstName;
         oppJSON.primaryContactPhone = o.Owner.Phone;
-        //oppJSON.customerTitle = o.Primary_Contact__r.Salutation;
-        //oppJSON.customerPhone = o.Primary_Contact__r.Phone;
-        //oppJSON.customerLastName = o.Primary_Contact__r.LastName;
+        oppJSON.customerTitle = o.Main_Contact__c__r.Salutation;
+        oppJSON.customerPhone = o.Main_Contact__c__r.Phone;
+        oppJSON.customerLastName = o.Main_Contact__c__r.LastName;
         oppJSON.customerFirstName = o.Main_Contact__c;
-        //oppJSON.customerEmail = o.Primary_Contact__r.Email;
+        oppJSON.customerEmail = o.Main_Contact__c__r.Email;
         oppJSON.partnerAcceptanceStatus = o.Acceptance_status__c;
         oppJSON.nextStep = o.NextStep;
         oppJSON.awsAccountId = o.Customer_AWS_Account_Id__c;
