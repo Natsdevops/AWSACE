@@ -149,10 +149,10 @@ public class AceHelperMethodsV2{
                     }
                 }  
             }
-            //if no match exists (neither Atos Opportunity ID or APN Id), map APN Id to new opportunity
+            //if no match exists (neither Atos Opportunity ID or APN Id), map APN Id to null
             else{
                 if(!queriedApnIds.contains(oppJson.APNCRMUniqueIdentifier)){
-                    oppMapping.put(oppJson.APNCRMUniqueIdentifier,new Opportunity());   
+                    oppMapping.put(oppJson.APNCRMUniqueIdentifier,null);   
                 }
             }
         }
@@ -161,7 +161,7 @@ public class AceHelperMethodsV2{
     }    
     
 //inserts or updates opportunities in SFDC
-    public static Map<Database.UpsertResult,String> UpsertOpps(Map<String,Opportunity> ApntoOppMapping,List<OpportunityJSON> opps){
+    public static Map<Database.UpsertResult,String> upsertOpps(Map<String,Opportunity> ApntoOppMapping,List<OpportunityJSON> opps){
         List<Opportunity> upsertList = new List<Opportunity>();
         PartnerIntegration__mdt mdt = getIntegrationMetadata();
         for(OpportunityJSON json : opps){
@@ -170,10 +170,12 @@ public class AceHelperMethodsV2{
             System.debug(o);
             
             if(json.partnerCrmUniqueIdentifier == null && o == null){                            
-                o = prepareNewInboundOpp(mdt,json);                                                        
+                o = prepareNewInboundOpp(mdt,json);
+                system.debug('New Inbound: ' + o);                                                        
             }
             else if(AceHelperMethodsV2.AllowAWSUpdates(o) && o != null){ 
                 o = prepareExistingInboundOpp(json,o);
+                system.debug('Existing Inbound: ' + o);
             }
             upsertList.add(o);          
         }       
@@ -188,7 +190,7 @@ public class AceHelperMethodsV2{
         return resultMap;       
     }
     
-    public static void ProcessUpsertResults(Map<Database.UpsertResult,String> resultMap){
+    public static void processUpsertResults(Map<Database.UpsertResult,String> resultMap){
         List<AWS_Integration_Log__c> logs = new List<AWS_Integration_Log__c>();        
         PartnerIntegration__mdt mdt  = getIntegrationMetadata();
         for(Database.UpsertResult result : resultMap.keySet()){
@@ -226,7 +228,7 @@ public class AceHelperMethodsV2{
         */
         o.AccountId = mdt.Integration_Account__c;
         o.OwnerId = mdt.Integration_User_Id__c;
-        //o.Name = CheckNameLength(json);
+        o.Name = json.partnerProjectTitle;
         //o.Type = 'New';
         //o.LeadSource = 'Vendor Referral';
         //o.Detailed_Source__c = 'Other';
@@ -237,7 +239,8 @@ public class AceHelperMethodsV2{
         o.AWS_Use_Case__c = json.useCase;
         o.CloseDate = date.valueOf(json.targetCloseDate);
         o.Target_Consumption_Date__c = date.valueOf(json.targetCloseDate);
-        //o.stageName = AceHelperMethodsV2.ConvertStage(json);
+        o.stageName = 'Y1';
+        o.status__c = 'E0002';
         o.Project_Description__c = json.projectDescription;                
         //o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
         //o.industry__c = json.industry;
