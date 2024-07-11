@@ -190,13 +190,13 @@ public class AceHelperMethodsV2{
     
     public static void ProcessUpsertResults(Map<Database.UpsertResult,String> resultMap){
         List<AWS_Integration_Log__c> logs = new List<AWS_Integration_Log__c>();        
-        PartnerIntegration__mdt mdt  = getIntegrationMetadata()
+        PartnerIntegration__mdt mdt  = getIntegrationMetadata();
         for(Database.UpsertResult result : resultMap.keySet()){
             String error = '';
             
             if(!result.isSuccess()){
                 AWS_Integration_Log__c log = new AWS_Integration_Log__c();
-                log.Account__c = mdt.AWS_Integration_Account_ID__c;
+                log.Account__c = mdt.Integration_Account__c;
                 
                 for(Database.Error err : result.getErrors()){
                     error += err.getMessage() + '; '; 
@@ -218,13 +218,13 @@ public class AceHelperMethodsV2{
     
     public static Opportunity prepareNewInboundOpp(PartnerIntegration__mdt mdt,OpportunityJSON json){
 
-        o = new Opportunity();
+        Opportunity o = new Opportunity();
         /*        
         if(CheckFirstLaunched(o,json)){
             o.AWS_Launched_Date__c = Date.Today();
         }
         */
-        o.AccountId = mdt.AWS_Integration_Account_ID__c;
+        o.AccountId = mdt.Integration_Account__c;
         o.OwnerId = mdt.Integration_User_Id__c;
         //o.Name = CheckNameLength(json);
         //o.Type = 'New';
@@ -286,7 +286,7 @@ public class AceHelperMethodsV2{
         o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
         //o.industry__c = json.industry;
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
-        o.Reasons_for_loosing__c = json.closedLostReason;
+        //o.Reasons_for_loosing__c = json.closedLostReason;
         o.AWS_Acceptance_Status__c = json.status;
         o.Opportunity_ownership__c = json.opportunityOwnership;
         o.AWS_Sales_Rep__c = json.aWSSalesRepName;
@@ -299,8 +299,8 @@ public class AceHelperMethodsV2{
         o.nextStep = json.nextStep;
         o.AWS_Sub_Use_Case__c = json.subUseCase; 
         o.Target_Consumption_Date__c = date.valueOf(json.targetCloseDate); 
-        o.RFX_Solicitation_Number__c = json.rfxSolicitationNumber;              
-    }
+        o.RFX_Solicitation_Number__c = json.rfxSolicitationNumber; 
+        return o;             
     }
 
     public static OpportunityJSON prepareOutboundOpp(Opportunity o){
@@ -324,23 +324,23 @@ public class AceHelperMethodsV2{
         oppJSON.customerCompanyName = o.Account.Name;
         //oppJSON.country = o.Account.Country_Full_Name__c;
         oppJSON.contractVehicle = o.Contract_Vehicle__c;
-        oppJSON.closedLostReason = o.Reasons_for_loosing__c;
+        //oppJSON.closedLostReason = o.Reasons_for_loosing__c;
         //function to convert state
         oppJSON.state = o.Account.BillingState;
         oppJSON.primaryContactLastName = o.Owner.LastName;
         oppJSON.primaryContactFirstName = o.Owner.FirstName;
         oppJSON.primaryContactPhone = o.Owner.Phone;
-        oppJSON.customerTitle = o.Main_Contact__c__r.Salutation;
-        oppJSON.customerPhone = o.Main_Contact__c__r.Phone;
-        oppJSON.customerLastName = o.Main_Contact__c__r.LastName;
+        oppJSON.customerTitle = o.Main_Contact__r.Salutation;
+        oppJSON.customerPhone = o.Main_Contact__r.Phone;
+        oppJSON.customerLastName = o.Main_Contact__r.LastName;
         oppJSON.customerFirstName = o.Main_Contact__c;
-        oppJSON.customerEmail = o.Main_Contact__c__r.Email;
+        oppJSON.customerEmail = o.Main_Contact__r.Email;
         oppJSON.partnerAcceptanceStatus = o.Acceptance_status__c;
         oppJSON.nextStep = o.NextStep;
         oppJSON.awsAccountId = o.Customer_AWS_Account_Id__c;
         oppJSON.additionalComments = o.AWS_Campaign__c;
         oppJSON.subUseCase = o.AWS_Sub_Use_Case__c;
-        oppJSON.campaignName = String.ValueOf(o.AWS_Campaign_Name__c); 
+        //oppJSON.campaignName = String.ValueOf(o.AWS_Campaign_Name__c); 
         oppJSON.isMarketingDevelopmentFunded = String.ValueOf(o.Marketing_Development_Funded__c);
         oppJSON.isThisForMarketplace = String.ValueOf(o.Is_this_Marketplace__c);
         oppJSON.IsOppFromMarketingActivity = String.valueOf(o.Is_Opp_From_Marketing_Activity__c);
@@ -526,7 +526,7 @@ public class AceHelperMethodsV2{
         System.debug('Convert Stage:' + convertedStage);
         return convertedStage;
     }
-    
+    */
     public static Boolean AllowAWSUpdates(Opportunity o){              
         Boolean allowUpdates = true;  
                  
@@ -537,7 +537,7 @@ public class AceHelperMethodsV2{
         System.debug('Allow AWS Updates:' + allowUpdates);
         return allowUpdates;
     }
-  
+    /*
     public static Boolean AllowStageAndCloseDateUpdates(Opportunity o, AWS__c settings){               
         Boolean allowUpdates = false;
         
@@ -547,7 +547,7 @@ public class AceHelperMethodsV2{
 
         System.debug('Allow Stage and Close Date Updates:' + allowUpdates);
         return allowUpdates;
-    }
+    } */
     
     public static Boolean CheckFirstShared(Opportunity o){
         Boolean firstShared = false;
@@ -571,7 +571,7 @@ public class AceHelperMethodsV2{
         return firstApproved; 
     }
     
-    public static Boolean CheckFirstLaunched(Opportunity o,OpportunityJSON json){
+  /*  public static Boolean CheckFirstLaunched(Opportunity o,OpportunityJSON json){
         Boolean firstLaunched = false;
         
         if(o.AWS_Launched_Date__c == null && json.stage == 'Launched'){
