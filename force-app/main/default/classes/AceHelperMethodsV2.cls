@@ -574,7 +574,7 @@ public class AceHelperMethodsV2{
         return firstApproved; 
     }
     
-  /*  public static Boolean CheckFirstLaunched(Opportunity o,OpportunityJSON json){
+   public static Boolean CheckFirstLaunched(Opportunity o,OpportunityJSON json){
         Boolean firstLaunched = false;
         
         if(o.AWS_Launched_Date__c == null && json.stage == 'Launched'){
@@ -595,7 +595,7 @@ public class AceHelperMethodsV2{
         System.debug('Check First Closed Lost:' + firstClosedLost);
         return firstClosedLost;
     }
-    */
+    
     public static List<String> getHistoricalAPNList(){
         List<String> historicalApnIds = new List<String>();
         StaticResource sr = [SELECT Id, Body FROM StaticResource WHERE Name = 'AceHistoricalAPN' LIMIT 1];
