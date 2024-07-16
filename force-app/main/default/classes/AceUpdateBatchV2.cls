@@ -1,5 +1,5 @@
 public with sharing class AceUpdateBatchV2 implements Database.Batchable<SObject>, Database.Stateful, Database.AllowsCallouts, Schedulable {
-    private final String QUERY = 'SELECT' 
+    private final String QUERY = 'SELECT ' 
                                     + 'id,' 
                                     + 'Opportunity_ID__c,'
                                     + 'APN_CRM_Unique_Identifier__c,'
@@ -17,7 +17,7 @@ public with sharing class AceUpdateBatchV2 implements Database.Batchable<SObject
                                     + 'Account.Website,'
                                     + 'Account.Name,'
                                     + 'Account.BillingCountry,'
-                                    + 'Account.Country_Full_Name__c,'
+                                    //+ 'Account.Country_Full_Name__c,'
                                     + 'Account.BillingState,'
                                     + 'Partner_Primary_Need__c,'
                                     + 'Contract_Vehicle__c,'
@@ -36,25 +36,26 @@ public with sharing class AceUpdateBatchV2 implements Database.Batchable<SObject
                                     + 'Send_to_AWS__c,'
                                     + 'First_Shared_with_AWS__c,'
                                     + 'AWS_Sub_Use_Case__c,'
-                                    + 'AWS_Campaign_Name__c,'
+                                    //+ 'AWS_Campaign_Name__c,'
                                     + 'Is_this_Marketplace__c,'
                                     + 'Marketing_Development_Funded__c,'
                                     + 'Marketing_Activity_Use_Case__c,'
                                     + 'Marketing_Activity_Channel__c,'
                                     + 'Is_Opp_From_Marketing_Activity__c,'
                                     + 'AWS_SF_Campaign_Name__c,'
-                                    + 'RFX_Solicitation_Number__c' 
-                                + 'FROM' 
-                                    + 'Opportunity'
-                                + 'WHERE' 
-                                    + 'SystemModStamp >= LAST_N_DAYS:1' 
-                                + 'AND' 
-                                    +'LastModifiedById !=: integrationUser' 
-                                + 'AND'
+                                    + 'RFX_Solicitation_Number__c ' 
+                                + 'FROM ' 
+                                    + 'Opportunity '
+                                + 'WHERE ' 
+                                    + 'SystemModStamp >= LAST_N_DAYS:1  ' 
+                                + 'AND ' 
+                                    +'LastModifiedById !=: integrationUser ' 
+                                + 'AND '
                                     + 'Send_to_AWS__c = true'
-                                    + (Test.isRunningTest()? 'LIMIT 200':''); 
+                                    + (Test.isRunningTest()? ' LIMIT 200':''); 
                                      
     PartnerIntegration__mdt mdt = AceHelperMethodsV2.getIntegrationMetadata();
+    string integrationUser = mdt.Integration_User_Id__c;
     private List<Opportunity> firstShared = new List<Opportunity>();
     
     public AceUpdateBatchV2() {
@@ -72,7 +73,7 @@ public with sharing class AceUpdateBatchV2 implements Database.Batchable<SObject
     
     public void execute(Database.BatchableContext BC, List<Opportunity> scope) {
         List<OpportunityJSON> JSONScope = new List<OpportunityJSON>();
-
+        system.debug('Scope size: ' + scope.size());
         for(Opportunity opp : scope){
             if(AceHelperMethodsV2.checkFirstShared(opp)){ 
                 opp.First_Shared_with_AWS__c = Date.Today();
