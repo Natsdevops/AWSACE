@@ -456,79 +456,6 @@ public class AceHelperMethodsV2{
     }
     
 //---------------------------------SECONDARY FUNCTIONS------------------------------------------------------    
-    
-    public static String ConvertStage(Opportunity o){
-        String convertedStage = '';
-        
-        switch on o.stageName{
-            when 'Prospect'{
-                convertedStage = 'Prospect';
-            }         
-            when 'Qualify'{
-                convertedStage = 'Qualified';
-            }           
-            when 'Propose'{
-                convertedStage = 'Technical Validation';
-            }           
-            when 'Negotiate'{
-                convertedStage = 'Business Validation';
-            }
-            when 'Procure'{
-                convertedStage = 'Committed';
-            }           
-            when 'Closed Won'{
-                if(o.Customer_AWS_Account_Id__c != null){
-                    convertedStage = 'Launched';
-                }
-                else{
-                    convertedStage = 'Committed';
-                }
-            }
-            when 'Order Validated'{
-                if(o.Customer_AWS_Account_Id__c != null){
-                    convertedStage = 'Launched';
-                }
-                else{
-                    convertedStage = 'Committed';
-                }
-            }
-            when 'Closed Lost'{
-                convertedStage = 'Closed Lost';
-            }
-        }
-        System.debug('Convert Stage:' + convertedStage);
-        return convertedStage;
-    }
-    
-    public static String ConvertStage(OpportunityJSON json){
-        String convertedStage = '';
-        
-        switch on json.stage{
-            when 'Prospect'{
-                convertedStage = 'Prospect';
-            } 
-            when 'Qualified'{
-                convertedStage = 'Qualify';
-            }
-            when 'Technical Validation'{
-                convertedStage = 'Propose';
-            }
-            when 'Business Validation'{
-                convertedStage = 'Negotiate';
-            }
-            when 'Committed'{
-                convertedStage = 'Procure';
-            }
-            when 'Launched'{
-                convertedStage = 'Closed Won';
-            }
-            when 'Closed Lost'{
-                convertedStage = 'Closed Lost';
-            }
-        }
-        System.debug('Convert Stage:' + convertedStage);
-        return convertedStage;
-    }
     */
     public static Boolean AllowAWSUpdates(Opportunity o){              
         Boolean allowUpdates = true;  
@@ -540,17 +467,6 @@ public class AceHelperMethodsV2{
         System.debug('Allow AWS Updates:' + allowUpdates);
         return allowUpdates;
     }
-    /*
-    public static Boolean AllowStageAndCloseDateUpdates(Opportunity o, AWS__c settings){               
-        Boolean allowUpdates = false;
-        
-        if(o.OwnerID == settings.Integration_User_Id__c){
-            allowUpdates = true;
-        }
-
-        System.debug('Allow Stage and Close Date Updates:' + allowUpdates);
-        return allowUpdates;
-    } */
     
     public static Boolean CheckFirstShared(Opportunity o){
         Boolean firstShared = false;
@@ -574,7 +490,7 @@ public class AceHelperMethodsV2{
         return firstApproved; 
     }
     
-  /*  public static Boolean CheckFirstLaunched(Opportunity o,OpportunityJSON json){
+    public static Boolean CheckFirstLaunched(Opportunity o,OpportunityJSON json){
         Boolean firstLaunched = false;
         
         if(o.AWS_Launched_Date__c == null && json.stage == 'Launched'){
@@ -595,7 +511,7 @@ public class AceHelperMethodsV2{
         System.debug('Check First Closed Lost:' + firstClosedLost);
         return firstClosedLost;
     }
-    */
+    
     public static List<String> getHistoricalAPNList(){
         List<String> historicalApnIds = new List<String>();
         StaticResource sr = [SELECT Id, Body FROM StaticResource WHERE Name = 'AceHistoricalAPN' LIMIT 1];
@@ -614,14 +530,7 @@ public class AceHelperMethodsV2{
         system.debug('isHistoricalAtos: ' + isHistoricalAtos);
         return isHistoricalAtos;
     }
-    /*
-    //check in with Svetlana about process
-    public static Boolean isAtosOpp(OpportunityJSON opp){
-        Boolean isAtosOpp = opp.partnerProjectTitle.startsWith('#Eviden');
-        system.debug('isAtosOpp: ' + isAtosOpp);
-        return isAtosOpp;
-    }
-*/  
+
 //---------------------------------API REQUESTS ----------------------------------------      
             
     public static String PutUpdateCallout(List<OpportunityJSON> oppJSONScope){
