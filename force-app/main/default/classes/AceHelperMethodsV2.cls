@@ -173,7 +173,7 @@ public class AceHelperMethodsV2{
                 o = prepareNewInboundOpp(mdt,json);
                 system.debug('New Inbound: ' + o);                                                        
             }
-            else if(AceHelperMethodsV2.AllowAWSUpdates(o) && o != null){ 
+            else if(AceHelperMethodsV2.allowAWSUpdates(o) && o != null){ 
                 o = prepareExistingInboundOpp(json,o);
                 system.debug('Existing Inbound: ' + o);
             }
@@ -241,11 +241,11 @@ public class AceHelperMethodsV2{
         o.Target_Consumption_Date__c = date.valueOf(json.targetCloseDate);
         //use new AWS stage picklist
         //o.stageName = 'Y1';
-        /staus function needed
+        //status function needed
         //o.status__c = 'E0002';
         o.Project_Description__c = json.projectDescription;                
         //o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
-        /mapping fucntion
+        //mapping function
         //o.industry__c = json.industry;
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
         o.AWS_Acceptance_Status__c = json.status;
@@ -354,14 +354,8 @@ public class AceHelperMethodsV2{
         System.debug('Prepare JSON Request:' + oppJSON);    
         return oppJSON;
     }
-/*
-    @future
-    public static void CRUpdateResultsHandler(string jsonResponse){
-        List<OpportunityResultJSON> results = AceHelperMethodsV2.ReadCRUpdateResults(jsonResponse);                                                   
-        AceHelperMethodsV2.ProcessCRUpdateResults(results);
-    }
-    
-    public static List<OpportunityResultJSON> ReadCRUpdateResults(string jsonResponse){
+
+    public static List<OpportunityResultJSON> readOutboundUpdateResults(string jsonResponse){
         String trimmedJson = jsonResponse.replace('\n','');
         List<OpportunityResultJSON> results = new List<OpportunityResultJSON>();
         JSONParser parser = JSON.createParser(trimmedJson);
@@ -380,7 +374,7 @@ public class AceHelperMethodsV2{
         return results;
     }
     
-    public static void ProcessCRUpdateResults(List<OpportunityResultJSON> results){
+    public static void processOutboundUpdateResults(List<OpportunityResultJSON> results){
         Map<Id,List<String>> oppIdMapping = new Map<Id,List<String>>();
         
         for(OpportunityResultJSON result : results){
@@ -456,8 +450,8 @@ public class AceHelperMethodsV2{
     }
     
 //---------------------------------SECONDARY FUNCTIONS------------------------------------------------------    
-    */
-    public static Boolean AllowAWSUpdates(Opportunity o){              
+
+    public static Boolean allowAWSUpdates(Opportunity o){              
         Boolean allowUpdates = true;  
                  
         if(o.isClosed){
@@ -468,7 +462,7 @@ public class AceHelperMethodsV2{
         return allowUpdates;
     }
     
-    public static Boolean CheckFirstShared(Opportunity o){
+    public static Boolean checkFirstShared(Opportunity o){
         Boolean firstShared = false;
         
         if(o.APN_CRM_Unique_Identifier__c == null && o.First_Shared_with_AWS__c == null){
@@ -479,7 +473,7 @@ public class AceHelperMethodsV2{
         return firstShared; 
     }
     
-    public static Boolean CheckFirstApproved(Opportunity o,OpportunityJSON json){
+    public static Boolean checkFirstApproved(Opportunity o,OpportunityJSON json){
         Boolean firstApproved = false;
         
         if(o.First_Accepted_by_AWS__c == null && o.AWS_Acceptance_Status__c != 'Approved' && json.status == 'Approved'){
@@ -490,7 +484,7 @@ public class AceHelperMethodsV2{
         return firstApproved; 
     }
     
-   public static Boolean CheckFirstLaunched(Opportunity o,OpportunityJSON json){
+   public static Boolean checkFirstLaunched(Opportunity o,OpportunityJSON json){
         Boolean firstLaunched = false;
         
         if(o.AWS_Launched_Date__c == null && json.stage == 'Launched'){
@@ -533,7 +527,7 @@ public class AceHelperMethodsV2{
 
 //---------------------------------API REQUESTS ----------------------------------------      
             
-    public static String PutUpdateCallout(List<OpportunityJSON> oppJSONScope){
+    public static String putUpdateCallout(List<OpportunityJSON> oppJSONScope){
         Map<String,Object> OppMap = new Map<String,Object>();
         OppMap.put('opportunities',oppJSONScope);
         OppMap.put('version','1');
