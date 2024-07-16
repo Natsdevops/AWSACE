@@ -221,11 +221,11 @@ public class AceHelperMethodsV2{
     public static Opportunity prepareNewInboundOpp(PartnerIntegration__mdt mdt,OpportunityJSON json){
 
         Opportunity o = new Opportunity();
-        /*        
+                
         if(CheckFirstLaunched(o,json)){
             o.AWS_Launched_Date__c = Date.Today();
         }
-        */
+
         o.AccountId = mdt.Integration_Account__c;
         o.OwnerId = mdt.Integration_User_Id__c;
         o.Name = json.partnerProjectTitle;
@@ -239,10 +239,13 @@ public class AceHelperMethodsV2{
         o.AWS_Use_Case__c = json.useCase;
         o.CloseDate = date.valueOf(json.targetCloseDate);
         o.Target_Consumption_Date__c = date.valueOf(json.targetCloseDate);
-        o.stageName = 'Y1';
-        o.status__c = 'E0002';
+        //use new AWS stage picklist
+        //o.stageName = 'Y1';
+        /staus function needed
+        //o.status__c = 'E0002';
         o.Project_Description__c = json.projectDescription;                
         //o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
+        /mapping fucntion
         //o.industry__c = json.industry;
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
         o.AWS_Acceptance_Status__c = json.status;
@@ -265,7 +268,7 @@ public class AceHelperMethodsV2{
     }
 
     public static Opportunity prepareExistingInboundOpp(OpportunityJSON json, Opportunity o){
-        /*
+        
         if(CheckFirstLaunched(o,json)){
             o.AWS_Launched_Date__c = Date.Today();
         }
@@ -274,19 +277,15 @@ public class AceHelperMethodsV2{
             o.AWS_Closed_Lost_Date__c = Date.Today();
         }
         
-        if(AceHelperMethodsV2.AllowStageAndCloseDateUpdates(o,settings)){
-            o.stageName = AceHelperMethodsV2.ConvertStage(json);
-            o.CloseDate = date.valueOf(json.targetCloseDate);
-        }
-        
         if(CheckFirstApproved(o,json)){
             o.First_Accepted_by_AWS__c = Date.Today();
         } 
-        */ 
+
         o.APN_CRM_Unique_Identifier__c = json.APNCRMUniqueIdentifier;             
         o.AWS_Use_Case__c = json.useCase;
         o.Project_Description__c = json.projectDescription;
         o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
+        //industry mapping function
         //o.industry__c = json.industry;
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
         //o.Reasons_for_loosing__c = json.closedLostReason;
@@ -309,7 +308,8 @@ public class AceHelperMethodsV2{
     public static OpportunityJSON prepareOutboundOpp(Opportunity o){
         OpportunityJSON oppJSON = new OpportunityJSON();
         oppJSON.name = o.Name;
-        //oppJSON.partnerProjectTitle = o.Name; 
+        oppJSON.partnerProjectTitle = o.Name; 
+        //new picklist field for AWS phase to be mapped from json.stage
         //oppJSON.stage = AceHelperMethodsV2.ConvertStage(o);            
         oppJSON.APNCRMUniqueIdentifier = o.APN_CRM_Unique_Identifier__c;                 
         oppJSON.useCase = o.AWS_Use_Case__c;
