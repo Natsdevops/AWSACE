@@ -525,6 +525,108 @@ public class AceHelperMethodsV2{
         return isHistoricalAtos;
     }
 
+    public static string IndustryMapping(Opportunity o){
+        String convertedIndustry = '';
+        
+        switch on o.Market__c{
+            when 'Aerospace'{
+                convertedIndustry = 'Manufacturing';
+            }
+
+            when 'Agriculture'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Automotive'{
+
+                convertedIndustry = 'Manufacturing';
+            }
+            when 'Computers & Electronics'{
+                convertedIndustry = 'Telecom, Media & Technology';
+            }
+           
+            when 'Consumer Goods'{
+
+                convertedIndustry = 'Manufacturing';
+            }
+            when 'Financial Services'{
+                convertedIndustry = 'Finance';
+            }
+            when 'Education'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Financial Services'{
+
+                convertedIndustry = 'Financial Services & Insurance';
+            }
+            when 'Gaming'{
+                convertedIndustry = 'Telecom, Media & Technology';
+            }
+            when 'Government'{
+                convertedIndustry = 'Public Sector & Defense';
+            }
+            when 'Healthcare' {
+
+                convertedIndustry = 'Health & Life Sciences';
+            }
+            when 'Hospitality'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Life Sciences'{
+                convertedIndustry = 'Health & Life Sciences';
+            }
+            when 'Manufacturing' {
+
+                convertedIndustry = 'Manufacturing';
+            }
+            when 'Marketing & Advertising'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Media & Entertainment'{
+                convertedIndustry = 'Telecom, Media & Technology';
+            }
+            when 'Mining'{
+                convertedIndustry='Resources & Services';
+            }
+            when 'Non-Profit Organization'{
+                convertedIndustry = 'Public Sector & Defense';
+            }
+            when 'Energy - Oil & Gas'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Other'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Energy - Power & Utilities'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Professional Services'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Real Estate & Construction'{
+                convertedIndustry = 'Manufacturing';
+            }
+            when 'Retail'{
+                convertedIndustry = 'Manufacturing';
+            }
+            when 'Software & Internet'{
+                convertedIndustry = 'Telecom, Media & Technology';
+            }
+            when 'Telecommunications'{
+                convertedIndustry = 'Telecom, Media & Technology;
+            }
+            when 'Transportation & Logistics'{
+                convertedIndustry = 'Resources & Services';
+                
+            }
+            when 'Wholesale & Distribution'{
+                convertedIndustry = 'Resources & Services';
+            }
+            
+        }
+        System.debug('Convert Industry:' + convertedIndustry);
+        return convertedIndustry;
+    }
+
 //---------------------------------API REQUESTS ----------------------------------------      
             
     public static String putUpdateCallout(List<OpportunityJSON> oppJSONScope){
