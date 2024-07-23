@@ -1,18 +1,18 @@
 public class AceIntegrationFutureQueue implements Queueable,Database.AllowsCallouts{    
-    private final AWS__c settings; 
+    private final PartnerIntegration__mdt mdt; 
     private final string batchName;
     private integer retryCount;
     
     
-    public AceIntegrationFutureQueue(string batchName,AWS__c settings, integer retryCount){       
-        this.settings = settings;              
+    public AceIntegrationFutureQueue(string batchName,PartnerIntegration__mdt mdt,integer retryCount){       
+        this.mdt = mdt;              
         this.batchName = batchName;
         
-        if(retryCount >= 0 && retryCount <= 3){
+        if(retryCount >= 1 && retryCount <= 3){
             this.retryCount = retryCount;
         }
         else{
-            this.retryCount = 0;
+            this.retryCount = 3;
         }       
     }
     
@@ -21,10 +21,10 @@ public class AceIntegrationFutureQueue implements Queueable,Database.AllowsCallo
         Http http = new Http();
         HttpRequest req = new HttpRequest();
         
-        String user = settings.AWS_User__c;
-        String pass = settings.AWS_Password__c;
-        String region = settings.AWS_Region__c;
-        String bucketName = settings.AWS_Bucket__c;
+        String user = mdt.Username__c;
+        String pass = mdt.Password__c;
+        String region = mdt.AWS_Region__c;
+        String bucketName = mdt.AWS_Bucket__c;
         
         String filePath = 'https://s3.'+ region +'.amazonaws.com/' + bucketName + '/opportunity-inbound-processed-results/';
         filePath += batchName;
@@ -35,7 +35,16 @@ public class AceIntegrationFutureQueue implements Queueable,Database.AllowsCallo
         req = s3Authentication.signedRequest('GET',endpoint,null,null,true,user,pass,region);
         
         System.debug(req);
+
+        Long startTime = DateTime.now().getTime();
+        Long finalTime = DateTime.now().getTime();
+        system.debug('Waiting 30 sec before retry ' + retryCount);
+        Long millisecondsToWait = 30000; // vary this depending on your "sleep" needs
         
+        while (finalTime - startTime < millisecondsToWait) {
+            finalTime = DateTime.now().getTime();
+        }
+
         system.debug('Making attempt '+ retryCount);
         HTTPResponse res = http.send(req);
         System.debug(res);
@@ -43,24 +52,16 @@ public class AceIntegrationFutureQueue implements Queueable,Database.AllowsCallo
         if (res.getStatusCode() == 200) {
             String jsonResponse = res.getBody();
             System.debug('Response-' + jsonResponse);
-            List<OpportunityResultJSON> results = AceHelperMethodsV2.ReadCRUpdateResults(jsonResponse);                                                   
-            AceHelperMethodsV2.ProcessCRUpdateResults(results);
+            List<OpportunityResultJSON> results = AceHelperMethodsV2.readOutboundUpdateResults(jsonResponse);                                                   
+            AceHelperMethodsV2.processOutboundUpdateResults(results);
         }
         else if(res.getStatusCode() == 404 && retryCount < 3){
             retryCount++;
-            
-            Long startTime = DateTime.now().getTime();
-            Long finalTime = DateTime.now().getTime();
-            system.debug('Waiting 30 sec before retry ' + retryCount);
-            Long millisecondsToWait = 30000; // vary this depending on your "sleep" needs
-            
-            while (finalTime - startTime < millisecondsToWait) {
-                finalTime = DateTime.now().getTime();
-            }
+
             system.debug('Initiating retry attempt ' + retryCount);
             
             if(!Test.isRunningTest()){  
-                system.enqueueJob(new AceIntegrationFutureQueue(this.batchName,this.settings,this.retryCount));
+                system.enqueueJob(new AceIntegrationFutureQueue(this.batchName,this.mdt,this.retryCount));
             }
         }
     }

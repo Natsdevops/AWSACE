@@ -173,7 +173,7 @@ public class AceHelperMethodsV2{
                 o = prepareNewInboundOpp(mdt,json);
                 system.debug('New Inbound: ' + o);                                                        
             }
-            else if(AceHelperMethodsV2.AllowAWSUpdates(o) && o != null){ 
+            else if(AceHelperMethodsV2.allowAWSUpdates(o) && o != null){ 
                 o = prepareExistingInboundOpp(json,o);
                 system.debug('Existing Inbound: ' + o);
             }
@@ -241,11 +241,11 @@ public class AceHelperMethodsV2{
         o.Target_Consumption_Date__c = date.valueOf(json.targetCloseDate);
         //use new AWS stage picklist
         //o.stageName = 'Y1';
-        /staus function needed
+        //status function needed
         //o.status__c = 'E0002';
         o.Project_Description__c = json.projectDescription;                
         //o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
-        /mapping fucntion
+        //mapping function
         //o.industry__c = json.industry;
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
         o.AWS_Acceptance_Status__c = json.status;
@@ -354,14 +354,8 @@ public class AceHelperMethodsV2{
         System.debug('Prepare JSON Request:' + oppJSON);    
         return oppJSON;
     }
-/*
-    @future
-    public static void CRUpdateResultsHandler(string jsonResponse){
-        List<OpportunityResultJSON> results = AceHelperMethodsV2.ReadCRUpdateResults(jsonResponse);                                                   
-        AceHelperMethodsV2.ProcessCRUpdateResults(results);
-    }
-    
-    public static List<OpportunityResultJSON> ReadCRUpdateResults(string jsonResponse){
+
+    public static List<OpportunityResultJSON> readOutboundUpdateResults(string jsonResponse){
         String trimmedJson = jsonResponse.replace('\n','');
         List<OpportunityResultJSON> results = new List<OpportunityResultJSON>();
         JSONParser parser = JSON.createParser(trimmedJson);
@@ -380,7 +374,7 @@ public class AceHelperMethodsV2{
         return results;
     }
     
-    public static void ProcessCRUpdateResults(List<OpportunityResultJSON> results){
+    public static void processOutboundUpdateResults(List<OpportunityResultJSON> results){
         Map<Id,List<String>> oppIdMapping = new Map<Id,List<String>>();
         
         for(OpportunityResultJSON result : results){
@@ -456,81 +450,8 @@ public class AceHelperMethodsV2{
     }
     
 //---------------------------------SECONDARY FUNCTIONS------------------------------------------------------    
-    
-    public static String ConvertStage(Opportunity o){
-        String convertedStage = '';
-        
-        switch on o.stageName{
-            when 'Prospect'{
-                convertedStage = 'Prospect';
-            }         
-            when 'Qualify'{
-                convertedStage = 'Qualified';
-            }           
-            when 'Propose'{
-                convertedStage = 'Technical Validation';
-            }           
-            when 'Negotiate'{
-                convertedStage = 'Business Validation';
-            }
-            when 'Procure'{
-                convertedStage = 'Committed';
-            }           
-            when 'Closed Won'{
-                if(o.Customer_AWS_Account_Id__c != null){
-                    convertedStage = 'Launched';
-                }
-                else{
-                    convertedStage = 'Committed';
-                }
-            }
-            when 'Order Validated'{
-                if(o.Customer_AWS_Account_Id__c != null){
-                    convertedStage = 'Launched';
-                }
-                else{
-                    convertedStage = 'Committed';
-                }
-            }
-            when 'Closed Lost'{
-                convertedStage = 'Closed Lost';
-            }
-        }
-        System.debug('Convert Stage:' + convertedStage);
-        return convertedStage;
-    }
-    
-    public static String ConvertStage(OpportunityJSON json){
-        String convertedStage = '';
-        
-        switch on json.stage{
-            when 'Prospect'{
-                convertedStage = 'Prospect';
-            } 
-            when 'Qualified'{
-                convertedStage = 'Qualify';
-            }
-            when 'Technical Validation'{
-                convertedStage = 'Propose';
-            }
-            when 'Business Validation'{
-                convertedStage = 'Negotiate';
-            }
-            when 'Committed'{
-                convertedStage = 'Procure';
-            }
-            when 'Launched'{
-                convertedStage = 'Closed Won';
-            }
-            when 'Closed Lost'{
-                convertedStage = 'Closed Lost';
-            }
-        }
-        System.debug('Convert Stage:' + convertedStage);
-        return convertedStage;
-    }
-    */
-    public static Boolean AllowAWSUpdates(Opportunity o){              
+
+    public static Boolean allowAWSUpdates(Opportunity o){              
         Boolean allowUpdates = true;  
                  
         if(o.isClosed){
@@ -540,19 +461,8 @@ public class AceHelperMethodsV2{
         System.debug('Allow AWS Updates:' + allowUpdates);
         return allowUpdates;
     }
-    /*
-    public static Boolean AllowStageAndCloseDateUpdates(Opportunity o, AWS__c settings){               
-        Boolean allowUpdates = false;
-        
-        if(o.OwnerID == settings.Integration_User_Id__c){
-            allowUpdates = true;
-        }
-
-        System.debug('Allow Stage and Close Date Updates:' + allowUpdates);
-        return allowUpdates;
-    } */
     
-    public static Boolean CheckFirstShared(Opportunity o){
+    public static Boolean checkFirstShared(Opportunity o){
         Boolean firstShared = false;
         
         if(o.APN_CRM_Unique_Identifier__c == null && o.First_Shared_with_AWS__c == null){
@@ -563,7 +473,7 @@ public class AceHelperMethodsV2{
         return firstShared; 
     }
     
-    public static Boolean CheckFirstApproved(Opportunity o,OpportunityJSON json){
+    public static Boolean checkFirstApproved(Opportunity o,OpportunityJSON json){
         Boolean firstApproved = false;
         
         if(o.First_Accepted_by_AWS__c == null && o.AWS_Acceptance_Status__c != 'Approved' && json.status == 'Approved'){
@@ -574,7 +484,7 @@ public class AceHelperMethodsV2{
         return firstApproved; 
     }
     
-   public static Boolean CheckFirstLaunched(Opportunity o,OpportunityJSON json){
+   public static Boolean checkFirstLaunched(Opportunity o,OpportunityJSON json){
         Boolean firstLaunched = false;
         
         if(o.AWS_Launched_Date__c == null && json.stage == 'Launched'){
@@ -614,17 +524,112 @@ public class AceHelperMethodsV2{
         system.debug('isHistoricalAtos: ' + isHistoricalAtos);
         return isHistoricalAtos;
     }
-    /*
-    //check in with Svetlana about process
-    public static Boolean isAtosOpp(OpportunityJSON opp){
-        Boolean isAtosOpp = opp.partnerProjectTitle.startsWith('#Eviden');
-        system.debug('isAtosOpp: ' + isAtosOpp);
-        return isAtosOpp;
+
+    public static string IndustryMapping(Opportunity o){
+        String convertedIndustry = '';
+        
+        switch on o.Market__c{
+            when 'Aerospace'{
+                convertedIndustry = 'Manufacturing';
+            }
+
+            when 'Agriculture'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Automotive'{
+
+                convertedIndustry = 'Manufacturing';
+            }
+            when 'Computers & Electronics'{
+                convertedIndustry = 'Telecom, Media & Technology';
+            }
+           
+            when 'Consumer Goods'{
+
+                convertedIndustry = 'Manufacturing';
+            }
+            when 'Financial Services'{
+                convertedIndustry = 'Finance';
+            }
+            when 'Education'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Financial Services'{
+
+                convertedIndustry = 'Financial Services & Insurance';
+            }
+            when 'Gaming'{
+                convertedIndustry = 'Telecom, Media & Technology';
+            }
+            when 'Government'{
+                convertedIndustry = 'Public Sector & Defense';
+            }
+            when 'Healthcare' {
+
+                convertedIndustry = 'Health & Life Sciences';
+            }
+            when 'Hospitality'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Life Sciences'{
+                convertedIndustry = 'Health & Life Sciences';
+            }
+            when 'Manufacturing' {
+
+                convertedIndustry = 'Manufacturing';
+            }
+            when 'Marketing & Advertising'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Media & Entertainment'{
+                convertedIndustry = 'Telecom, Media & Technology';
+            }
+            when 'Mining'{
+                convertedIndustry='Resources & Services';
+            }
+            when 'Non-Profit Organization'{
+                convertedIndustry = 'Public Sector & Defense';
+            }
+            when 'Energy - Oil & Gas'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Other'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Energy - Power & Utilities'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Professional Services'{
+                convertedIndustry = 'Resources & Services';
+            }
+            when 'Real Estate & Construction'{
+                convertedIndustry = 'Manufacturing';
+            }
+            when 'Retail'{
+                convertedIndustry = 'Manufacturing';
+            }
+            when 'Software & Internet'{
+                convertedIndustry = 'Telecom, Media & Technology';
+            }
+            when 'Telecommunications'{
+                convertedIndustry = 'Telecom, Media & Technology;
+            }
+            when 'Transportation & Logistics'{
+                convertedIndustry = 'Resources & Services';
+                
+            }
+            when 'Wholesale & Distribution'{
+                convertedIndustry = 'Resources & Services';
+            }
+            
+        }
+        System.debug('Convert Industry:' + convertedIndustry);
+        return convertedIndustry;
     }
-*/  
+
 //---------------------------------API REQUESTS ----------------------------------------      
             
-    public static String PutUpdateCallout(List<OpportunityJSON> oppJSONScope){
+    public static String putUpdateCallout(List<OpportunityJSON> oppJSONScope){
         Map<String,Object> OppMap = new Map<String,Object>();
         OppMap.put('opportunities',oppJSONScope);
         OppMap.put('version','1');
