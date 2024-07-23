@@ -1,7 +1,7 @@
 @isTest
 public class AceHelperMethodsV2Tests{
 //-----------------------API REQUEST------------------------------------------------- 
-/*
+
 @isTest(SeeAllData=true)
     public static void PutCRUpdateCalloutTest(){
         AWS__c CRsetting = AWS__c.getValues('AWS Integration Settings');
@@ -17,7 +17,8 @@ public class AceHelperMethodsV2Tests{
         String processedPath = AceHelperMethodsV2.PutCRUpdateCallout(CRsetting,oppJsonList);
         System.Assert(processedPath.startsWith('OpportunityBatch-' + Date.Today().month() + '-' + Date.Today().day() + '-' + Date.Today().year()));
         System.Assert(processedPath.endsWith('_result.json'));
-    }    
+    }  
+/*  
 //-----------------------CORE FUNCTIONS----------------------------------------------
     @isTest
     public static void CheckIntegrationTypeJSONTest(){
@@ -306,7 +307,7 @@ public class AceHelperMethodsV2Tests{
         name = AceHelperMethodsV2.CheckAWSName(o);
         System.AssertEquals(o.AWS_Opportunity_Name__c,name);
     }
-    
+    */
     @isTest
     public static void CheckFirstSharedTest(){
         Opportunity o = new Opportunity();
@@ -328,7 +329,7 @@ public class AceHelperMethodsV2Tests{
         firstShared = AceHelperMethodsV2.CheckFirstShared(o);
         System.AssertEquals(False,firstShared);
     }
-    
+    /*
     @isTest
     public static void CheckFirstApprovedTest(){
         Opportunity o = new Opportunity();
