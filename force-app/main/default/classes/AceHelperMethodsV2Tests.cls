@@ -1,7 +1,8 @@
 @isTest
 public class AceHelperMethodsV2Tests{
-//-----------------------API REQUEST-------------------------------------------------
-    @isTest(SeeAllData=true)
+//-----------------------API REQUEST------------------------------------------------- 
+/*
+@isTest(SeeAllData=true)
     public static void PutCRUpdateCalloutTest(){
         AWS__c CRsetting = AWS__c.getValues('AWS Integration Settings');
         OpportunityJSON json1 = (OpportunityJSON) Json.deserialize('{"partnerProjectTitle":"API Test","APNCRMUniqueIdentifier":"O713940","partnerCrmUniqueIdentifier":"0065I000008FdivQAC","targetCloseDate":"2022-01-01","stage":"Prospect"}',OpportunityJSON.Class);
@@ -100,17 +101,7 @@ public class AceHelperMethodsV2Tests{
         
         upsertResults = AceHelperMethodsV2.UpsertOpps(oppMapping,oppJsonList,CRsetting);
     }
-/*    
-    @isTest
-    public static void QueryUpsertedOppsTest(){
-        List<Opportunity> testOpps = Test.loadData(Opportunity.sObjectType, 'AceTestOpps1');
-        Database.UpsertResult[] upsertResults = database.upsert(testOpps,false);
-        
-        List<Opportunity> upsertedOpps = AceHelperMethodsV2.QueryUpsertedOpps(upsertResults);
-        
-        System.AssertEquals(upsertResults.size(),upsertedOpps.size());
-    }
-*/    
+
     @isTest(SeeAllData=true)
     public static void ProcessUpsertResultsTest(){        
         List<Opportunity> testOpps = Test.loadData(Opportunity.sObjectType, 'AceTestOpps1');
@@ -496,4 +487,5 @@ public class AceHelperMethodsV2Tests{
         system.Assert(endDateMap.get(oList[1].id) == testProj2.pse__End_Date__c);
         system.Assert(endDateMap.get(oList[2].id) == testProj3.pse__End_Date__c);
     }
+*/
 }

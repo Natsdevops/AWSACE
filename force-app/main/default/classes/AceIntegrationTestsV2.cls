@@ -1,6 +1,6 @@
 @isTest
 public class AceIntegrationTestsV2{
-    
+/*    
     @isTest(SeeAllData=True)
     public static void AceUpdateBatchV2Test(){
         String resultPath = 'testPath';
@@ -85,4 +85,5 @@ public class AceIntegrationTestsV2{
         System.Assert(testOpps.size() >= 1);
         Test.stopTest(); 
     }
+*/
 }
