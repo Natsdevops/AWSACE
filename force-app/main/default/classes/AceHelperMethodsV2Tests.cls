@@ -3,8 +3,7 @@ public class AceHelperMethodsV2Tests{
 //-----------------------API REQUEST------------------------------------------------- 
 
 @isTest(SeeAllData=true)
-    public static void PutCRUpdateCalloutTest(){
-        AWS__c CRsetting = AWS__c.getValues('AWS Integration Settings');
+    public static void putUpdateCalloutTest(){
         OpportunityJSON json1 = (OpportunityJSON) Json.deserialize('{"partnerProjectTitle":"API Test","APNCRMUniqueIdentifier":"O713940","partnerCrmUniqueIdentifier":"0065I000008FdivQAC","targetCloseDate":"2022-01-01","stage":"Prospect"}',OpportunityJSON.Class);
         List<OpportunityJSON> oppJsonList = new List<OpportunityJSON>();
         oppjsonList.add(json1);
@@ -14,7 +13,7 @@ public class AceHelperMethodsV2Tests{
         mock.setHeader('Content-Type', 'application/json'); 
         
         Test.setMock(HttpCalloutMock.class, mock);
-        String processedPath = AceHelperMethodsV2.PutCRUpdateCallout(CRsetting,oppJsonList);
+        String processedPath = AceHelperMethodsV2.putUpdateCallout(oppJsonList);
         System.Assert(processedPath.startsWith('OpportunityBatch-' + Date.Today().month() + '-' + Date.Today().day() + '-' + Date.Today().year()));
         System.Assert(processedPath.endsWith('_result.json'));
     }  
