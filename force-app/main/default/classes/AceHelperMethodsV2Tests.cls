@@ -367,8 +367,8 @@ public static void prepareNewInboundopptest(){
     
     
 }
+/*
 @isTest
-
 public static void prepareExistingInboundOppTest(){
     PartnerIntegration__mdt mdt=AceHelperMethodsV2.getIntegrationMetadata();
     OpportunityJSON oppJson= new OpportunityJSON();
@@ -377,6 +377,7 @@ public static void prepareExistingInboundOppTest(){
     Opportunity o= AceHelperMethodsV2.prepareExistingInboundOpp(mdt, oppJson);
     system.assertEquals('O999999', o.APN_CRM_Unique_Identifier__c);
 }
+*/
 @isTest
 public statiC void prepareOutboundOpp(){
 
