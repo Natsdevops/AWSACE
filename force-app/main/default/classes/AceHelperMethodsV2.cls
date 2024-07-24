@@ -514,10 +514,10 @@ public class AceHelperMethodsV2{
         return isHistoricalAtos;
     }
     
-    public static string IndustryMapping(OpportunityJson o){
+    public static string IndustryMapping(Opportunity o){
         String convertedIndustry = '';
         
-        switch on o.industry{
+        switch on o.Market__c{
             when 'Aerospace'{
                 convertedIndustry = 'Manufacturing';
             }
@@ -526,18 +526,24 @@ public class AceHelperMethodsV2{
                 convertedIndustry = 'Resources & Services';
             }
             when 'Automotive'{
+
                 convertedIndustry = 'Manufacturing';
             }
             when 'Computers & Electronics'{
                 convertedIndustry = 'Telecom, Media & Technology';
             }
+           
             when 'Consumer Goods'{
+
                 convertedIndustry = 'Manufacturing';
             }
+            
+            
             when 'Education'{
                 convertedIndustry = 'Resources & Services';
             }
             when 'Financial Services'{
+
                 convertedIndustry = 'Financial Services & Insurance';
             }
             when 'Gaming'{
@@ -547,6 +553,7 @@ public class AceHelperMethodsV2{
                 convertedIndustry = 'Public Sector & Defense';
             }
             when 'Healthcare' {
+
                 convertedIndustry = 'Health & Life Sciences';
             }
             when 'Hospitality'{
@@ -556,6 +563,7 @@ public class AceHelperMethodsV2{
                 convertedIndustry = 'Health & Life Sciences';
             }
             when 'Manufacturing' {
+
                 convertedIndustry = 'Manufacturing';
             }
             when 'Marketing & Advertising'{
@@ -594,9 +602,9 @@ public class AceHelperMethodsV2{
             when 'Telecommunications'{
                 convertedIndustry = 'Telecom, Media & Technology';
             }
-            when 'Transportation & Logistics'{
-                convertedIndustry = 'Resources & Services';
-            }
+            
+                
+            
             when 'Wholesale & Distribution'{
                 convertedIndustry = 'Resources & Services';
             }
