@@ -355,4 +355,38 @@ public class AceHelperMethodsV2Tests{
         system.Assert(!test2);
     }
 */
+
+@isTest
+public static void prepareNewInboundopptest(){
+    PartnerIntegration__mdt mdt=AceHelperMethodsV2.getIntegrationMetadata();
+    OpportunityJSON oppJson= new OpportunityJSON();
+    oppJson.APNCRMUniqueIdentifier= 'O999999';
+    oppJson.stage='Closed Won';
+    Opportunity o= AceHelperMethodsV2.prepareNewInboundOpp(mdt, oppJson);
+    system.assertEquals('O999999', o.APN_CRM_Unique_Identifier__c);
+    
+    
+}
+@isTest
+
+public static void prepareExistingInboundOppTest(){
+    PartnerIntegration__mdt mdt=AceHelperMethodsV2.getIntegrationMetadata();
+    OpportunityJSON oppJson= new OpportunityJSON();
+    oppJson.APNCRMUniqueIdentifier= 'O999999';
+    oppJson.stage='Closed Won';
+    Opportunity o= AceHelperMethodsV2.prepareExistingInboundOpp(mdt, oppJson);
+    system.assertEquals('O999999', o.APN_CRM_Unique_Identifier__c);
+}
+@isTest
+public statiC void prepareOutboundOpp(){
+
+    PartnerIntegration__mdt mdt=AceHelperMethodsV2.getIntegrationMetadata();
+    Opportunity o= new Opportunity();
+    o.Name='Test';
+    o.APN_CRM_Unique_Identifier__c='O999999';
+    OpportunityJSON oppJson=AceHelperMethodsV2.prepareOutboundOpp(o);
+
+    system.assertEquals('O999999', oppJson.APNCRMUniqueIdentifier);
+}
+
 }
