@@ -36,7 +36,7 @@ public with sharing class AceUpdateBatchV2 implements Database.Batchable<SObject
                                     + 'Send_to_AWS__c,'
                                     + 'First_Shared_with_AWS__c,'
                                     + 'AWS_Sub_Use_Case__c,'
-                                    //+ 'AWS_Campaign_Name__c,'
+                                    + 'AWS_Campaign__c,'
                                     + 'Is_this_Marketplace__c,'
                                     + 'Marketing_Development_Funded__c,'
                                     + 'Marketing_Activity_Use_Case__c,'

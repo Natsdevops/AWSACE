@@ -238,8 +238,7 @@ public class AceHelperMethodsV2{
         o.status__c = 'E0001';
         o.Win_Probabilities__c = '10';
         o.Project_Description__c = json.projectDescription;                
-        //mapping function
-        //o.industry__c = json.industry;
+        o.industry__c = IndustryMapping(json);
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
         o.AWS_Acceptance_Status__c = json.status;
         o.Opportunity_ownership__c = json.opportunityOwnership;
@@ -278,10 +277,8 @@ public class AceHelperMethodsV2{
         o.AWS_Use_Case__c = json.useCase;
         o.Project_Description__c = json.projectDescription;
         o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
-        //industry mapping function
-        //o.industry__c = json.industry;
+        o.industry__c = IndustryMapping(json);
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
-        //o.Reasons_for_loosing__c = json.closedLostReason;
         o.AWS_Acceptance_Status__c = json.status;
         o.Opportunity_ownership__c = json.opportunityOwnership;
         o.AWS_Sales_Rep__c = json.aWSSalesRepName;
@@ -302,26 +299,25 @@ public class AceHelperMethodsV2{
         OpportunityJSON oppJSON = new OpportunityJSON();
         oppJSON.name = o.Name;
         oppJSON.partnerProjectTitle = o.Name; 
-        //new picklist field for AWS phase to be mapped from json.stage
         oppJSON.stage = o.AWS_Stage__c;            
         oppJSON.APNCRMUniqueIdentifier = o.APN_CRM_Unique_Identifier__c;                 
         oppJSON.useCase = o.AWS_Use_Case__c;
         oppJSON.targetCloseDate = String.valueOf(o.Target_Consumption_Date__c);
         oppJSON.projectDescription = o.Project_Description__c;
         oppJSON.primaryContactEmail = o.Owner.Email;
-        //function to convert billing countrty code
         oppJSON.postalCode = o.Account.BillingPostalCode;           
         oppJSON.partnerPrimaryNeedFromAws = o.Partner_Primary_Need__c;            
         oppJSON.partnerCrmUniqueIdentifier = o.id;
-        oppJSON.industry = IndustryMapping(o);
+        oppJSON.industry = 'Aerospace';
         oppJSON.expectedMonthlyAwsRevenue = (Integer) o.Expected_Monthly_AWS_Revenue__c;
         oppJSON.deliveryModel = o.Delivery_Model__c;
         oppJSON.customerWebsite = o.Account.Website;
         oppJSON.customerCompanyName = o.Account.Name;
-        //oppJSON.country = o.Account.Country_Full_Name__c;
+        oppJSON.country = o.Account.BillingCountry;
         oppJSON.contractVehicle = o.Contract_Vehicle__c;
-        //oppJSON.closedLostReason = o.Reasons_for_loosing__c;
-        //function to convert state
+        if(o.AWS_Stage__c == 'Closed Lost'){
+            oddJSON.closedLostReason = 'Other';
+        }
         oppJSON.state = o.Account.BillingState;
         oppJSON.primaryContactLastName = o.Owner.LastName;
         oppJSON.primaryContactFirstName = o.Owner.FirstName;
@@ -518,10 +514,10 @@ public class AceHelperMethodsV2{
         return isHistoricalAtos;
     }
     
-    public static string IndustryMapping(Opportunity o){
+    public static string IndustryMapping(OpportunityJson o){
         String convertedIndustry = '';
         
-        switch on o.Market__c{
+        switch on o.industry{
             when 'Aerospace'{
                 convertedIndustry = 'Manufacturing';
             }
