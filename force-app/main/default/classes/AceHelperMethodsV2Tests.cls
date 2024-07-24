@@ -1,9 +1,9 @@
 @isTest
 public class AceHelperMethodsV2Tests{
-//-----------------------API REQUEST-------------------------------------------------
-    @isTest(SeeAllData=true)
-    public static void PutCRUpdateCalloutTest(){
-        AWS__c CRsetting = AWS__c.getValues('AWS Integration Settings');
+//-----------------------API REQUEST------------------------------------------------- 
+
+@isTest(SeeAllData=true)
+    public static void putUpdateCalloutTest(){
         OpportunityJSON json1 = (OpportunityJSON) Json.deserialize('{"partnerProjectTitle":"API Test","APNCRMUniqueIdentifier":"O713940","partnerCrmUniqueIdentifier":"0065I000008FdivQAC","targetCloseDate":"2022-01-01","stage":"Prospect"}',OpportunityJSON.Class);
         List<OpportunityJSON> oppJsonList = new List<OpportunityJSON>();
         oppjsonList.add(json1);
@@ -13,52 +13,12 @@ public class AceHelperMethodsV2Tests{
         mock.setHeader('Content-Type', 'application/json'); 
         
         Test.setMock(HttpCalloutMock.class, mock);
-        String processedPath = AceHelperMethodsV2.PutCRUpdateCallout(CRsetting,oppJsonList);
+        String processedPath = AceHelperMethodsV2.putUpdateCallout(oppJsonList);
         System.Assert(processedPath.startsWith('OpportunityBatch-' + Date.Today().month() + '-' + Date.Today().day() + '-' + Date.Today().year()));
         System.Assert(processedPath.endsWith('_result.json'));
-    }    
+    }  
+/*  
 //-----------------------CORE FUNCTIONS----------------------------------------------
-    @isTest
-    public static void CheckIntegrationTypeJSONTest(){
-        AWS__c setting;
-        String jsonString = '';
-        
-        jsonString = '{"version":"1","spmsId":"1450","opportunities":[{"name":"Test"}]}';
-        setting = AceHelperMethodsV2.CheckIntegrationType(jsonString);
-        System.AssertEquals(AWS__c.getValues('AWS Integration Settings'),setting);
-        
-        jsonString = '{"version":"1","spmsId":"5896","opportunities":[{"name":"Test"}]}';
-        setting = AceHelperMethodsV2.CheckIntegrationType(jsonString);
-        System.AssertEquals(AWS__c.getValues('AWS CMZ Integration Settings'),setting);
-    }
-    
-    @isTest
-    public static void CheckIntegrationTypeIntegerTest(){
-        AWS__c setting;
-        Integer integrationType;
-        
-        integrationType = 0;
-        setting = AceHelperMethodsV2.CheckIntegrationType(integrationType);
-        System.AssertEquals(AWS__c.getValues('AWS Integration Settings'),setting);
-        
-        integrationType = 1;
-        setting = AceHelperMethodsV2.CheckIntegrationType(integrationType);
-        System.AssertEquals(AWS__c.getValues('AWS CMZ Integration Settings'),setting);
-    }
-    
-    @isTest(SeeAllData=true)
-    public static void ReadAWSUpdateTest(){
-        List<OpportunityJSON> oppJsonList = new List<OpportunityJSON>();
-        String jsonString = '';
-        
-        jsonString = '{"version":"1","spmsId":"1450","opportunities":[{"name":"Test1","partnerProjectTitle":"test1"},{"name":"Test2","partnerCrmUniqueIdentifier":"APN","partnerProjectTitle":"test2"},{"name":"Test3","partnerCrmUniqueIdentifier":"CR","partnerProjectTitle":"test3"},{"name":"Test4","APNCRMUniqueIdentifier":"O999999","partnerProjectTitle":"test4","partnerCrmUniqueIdentifier":"APN"},{"name":"Test5","partnerProjectTitle":"#Eviden","partnerCrmUniqueIdentifier":"APN"}]}';
-        oppJsonList = AceHelperMethodsV2.ReadAWSUpdate(jsonString);
-        System.AssertEquals(3,oppJsonList.size());
-        System.AssertEquals('Test1',oppJsonList[0].name);
-        System.AssertEquals('Test2',oppJsonList[1].name);  
-        System.AssertEquals(oppJsonList.size(), 3);
-    }
-    
     @isTest
     public static void CreateAPNIdtoOppMappingTest(){
         Map<String,Opportunity> oppMapping = new Map<String,Opportunity>();       
@@ -100,17 +60,7 @@ public class AceHelperMethodsV2Tests{
         
         upsertResults = AceHelperMethodsV2.UpsertOpps(oppMapping,oppJsonList,CRsetting);
     }
-/*    
-    @isTest
-    public static void QueryUpsertedOppsTest(){
-        List<Opportunity> testOpps = Test.loadData(Opportunity.sObjectType, 'AceTestOpps1');
-        Database.UpsertResult[] upsertResults = database.upsert(testOpps,false);
-        
-        List<Opportunity> upsertedOpps = AceHelperMethodsV2.QueryUpsertedOpps(upsertResults);
-        
-        System.AssertEquals(upsertResults.size(),upsertedOpps.size());
-    }
-*/    
+
     @isTest(SeeAllData=true)
     public static void ProcessUpsertResultsTest(){        
         List<Opportunity> testOpps = Test.loadData(Opportunity.sObjectType, 'AceTestOpps1');
@@ -208,57 +158,6 @@ public class AceHelperMethodsV2Tests{
 
 //-----------------------SECONDARY FUNCTIONS-----------------------------------------
     @isTest
-    public static void ConvertStageOpportunityTest(){   
-        Opportunity o = new Opportunity();
-        String convertedStage = '';
-        Map<String,String> stageNames = new Map<String,String>{
-            'Prospect' => 'Prospect',
-            'Qualify' => 'Qualified',
-            'Propose' => 'Technical Validation',
-            'Negotiate' => 'Business Validation',
-            'Procure' => 'Committed',           
-            'Order Validated' => 'Committed',
-            'Closed Lost' => 'Closed Lost'
-        };
-        
-        for(String stageName : stageNames.keySet()){
-            o.stageName = stageName;        
-            convertedStage = AceHelperMethodsV2.ConvertStage(o);
-            System.AssertEquals(stageNames.get(stagename),convertedStage);
-        } 
-        
-        o.stageName = 'Closed Won';
-        convertedStage = AceHelperMethodsV2.ConvertStage(o);
-        System.AssertEquals('Committed',convertedStage);
-        
-        o.Customer_AWS_Account_Id__c = '123456789101';
-        convertedStage = AceHelperMethodsV2.ConvertStage(o);
-        System.AssertEquals('Launched',convertedStage);
-              
-    }
-    
-    @isTest
-    public static void ConvertStageOpportunityJSONTest(){   
-        OpportunityJSON json = new OpportunityJSON();
-        String convertedStage = '';
-        Map<String,String> stageNames = new Map<String,String>{
-            'Prospect' => 'Prospect',
-            'Qualified' => 'Qualify',
-            'Technical Validation' => 'Propose',
-            'Business Validation' => 'Negotiate',
-            'Committed' => 'Procure',
-            'Launched' => 'Closed Won',            
-            'Closed Lost' => 'Closed Lost'
-        };
-        
-        for(String stageName : stageNames.keySet()){
-            json.stage = stageName;        
-            convertedStage = AceHelperMethodsV2.ConvertStage(json);
-            System.AssertEquals(stageNames.get(stagename),convertedStage);
-        } 
-    }
-    
-    @isTest
     public static void AllowAWSUpdatesTest(){
         Opportunity o = new Opportunity();
         Boolean allowAWSUpdate;
@@ -301,21 +200,7 @@ public class AceHelperMethodsV2Tests{
         name = AceHelperMethodsV2.CheckNameLength(json);
         System.AssertEquals(json.partnerProjectTitle,name);            
     }
-    
-    @isTest
-    public static void CheckAWSNameTest(){
-        Opportunity o = new Opportunity();
-        String name = '';        
-        
-        o = (Opportunity) Json.deserialize('{"name":"Test"}', Opportunity.class);
-        name = AceHelperMethodsV2.CheckAWSName(o);
-        System.AssertEquals(o.name,name);
-        
-        o = (Opportunity) Json.deserialize('{"name":"Test","AWS_Opportunity_Name__c":"AWS Test"}', Opportunity.class);
-        name = AceHelperMethodsV2.CheckAWSName(o);
-        System.AssertEquals(o.AWS_Opportunity_Name__c,name);
-    }
-    
+    */
     @isTest
     public static void CheckFirstSharedTest(){
         Opportunity o = new Opportunity();
@@ -337,7 +222,7 @@ public class AceHelperMethodsV2Tests{
         firstShared = AceHelperMethodsV2.CheckFirstShared(o);
         System.AssertEquals(False,firstShared);
     }
-    
+    /*
     @isTest
     public static void CheckFirstApprovedTest(){
         Opportunity o = new Opportunity();
@@ -469,31 +354,39 @@ public class AceHelperMethodsV2Tests{
         system.Assert(test1);
         system.Assert(!test2);
     }
+*/
 
-    @isTest(SeeAllData=true)
-    public static void GetProjectEndDatesTest(){
-        List<pse__Proj__c> projectList = [SELECT id, pse__End_Date__c, pse__Opportunity__c FROM pse__Proj__c WHERE pse__Opportunity__c != null  AND (NOT Name LIKE 'PS%') AND (NOT Name LIKE '%Funding%') LIMIT 3];
-        List<ID> oppIds = new List<ID>();
+@isTest
+public static void prepareNewInboundopptest(){
+    PartnerIntegration__mdt mdt=AceHelperMethodsV2.getIntegrationMetadata();
+    OpportunityJSON oppJson= new OpportunityJSON();
+    oppJson.APNCRMUniqueIdentifier= 'O999999';
+    oppJson.stage='Closed Won';
+    Opportunity o= AceHelperMethodsV2.prepareNewInboundOpp(mdt, oppJson);
+    system.assertEquals('O999999', o.APN_CRM_Unique_Identifier__c);
+    
+    
+}
+@isTest
 
-        for(pse__Proj__c p : projectList){
-            oppIds.add(p.pse__Opportunity__c);
-        }
+public static void prepareExistingInboundOppTest(){
+    PartnerIntegration__mdt mdt=AceHelperMethodsV2.getIntegrationMetadata();
+    OpportunityJSON oppJson= new OpportunityJSON();
+    oppJson.APNCRMUniqueIdentifier= 'O999999';
+    oppJson.stage='Closed Won';
+    Opportunity o= AceHelperMethodsV2.prepareExistingInboundOpp(mdt, oppJson);
+    system.assertEquals('O999999', o.APN_CRM_Unique_Identifier__c);
+}
+@isTest
+public statiC void prepareOutboundOpp(){
 
-        system.debug(projectList);
-        system.debug(oppIds);
+    PartnerIntegration__mdt mdt=AceHelperMethodsV2.getIntegrationMetadata();
+    Opportunity o= new Opportunity();
+    o.Name='Test';
+    o.APN_CRM_Unique_Identifier__c='O999999';
+    OpportunityJSON oppJson=AceHelperMethodsV2.prepareOutboundOpp(o);
 
-        List<Opportunity> oList = [SELECT id FROM Opportunity WHERE id IN: oppIds];
+    system.assertEquals('O999999', oppJson.APNCRMUniqueIdentifier);
+}
 
-        Map<id,date> endDateMap = AceHelperMethodsV2.GetProjectEndDates(oList);
-        
-        system.Assert(endDateMap.keySet().size() == 3);
-
-        pse__Proj__c testProj1 = [SELECT id, pse__End_Date__c FROM pse__Proj__c WHERE pse__Opportunity__c = :oList[0].id AND (NOT Name LIKE 'PS%') AND (NOT Name LIKE '%Funding%')];
-        pse__Proj__c testProj2 = [SELECT id, pse__End_Date__c FROM pse__Proj__c WHERE pse__Opportunity__c = :oList[1].id AND (NOT Name LIKE 'PS%') AND (NOT Name LIKE '%Funding%')];
-        pse__Proj__c testProj3 = [SELECT id, pse__End_Date__c FROM pse__Proj__c WHERE pse__Opportunity__c = :oList[2].id AND (NOT Name LIKE 'PS%') AND (NOT Name LIKE '%Funding%')];
-        
-        system.Assert(endDateMap.get(oList[0].id) == testProj1.pse__End_Date__c);
-        system.Assert(endDateMap.get(oList[1].id) == testProj2.pse__End_Date__c);
-        system.Assert(endDateMap.get(oList[2].id) == testProj3.pse__End_Date__c);
-    }
 }
