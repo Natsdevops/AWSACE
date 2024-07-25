@@ -238,7 +238,7 @@ public class AceHelperMethodsV2{
         o.status__c = 'E0001';
         o.Win_Probabilities__c = '10';
         o.Project_Description__c = json.projectDescription;                
-        o.industry__c = IndustryMapping(json);
+        o.market__c = IndustryMapping(json);
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
         o.AWS_Acceptance_Status__c = json.status;
         o.Opportunity_ownership__c = json.opportunityOwnership;
@@ -277,7 +277,7 @@ public class AceHelperMethodsV2{
         o.AWS_Use_Case__c = json.useCase;
         o.Project_Description__c = json.projectDescription;
         o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
-        o.industry__c = IndustryMapping(json);
+        o.market__c = IndustryMapping(json);
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
         o.AWS_Acceptance_Status__c = json.status;
         o.Opportunity_ownership__c = json.opportunityOwnership;
@@ -514,10 +514,10 @@ public class AceHelperMethodsV2{
         return isHistoricalAtos;
     }
     
-    public static string IndustryMapping(Opportunity o){
+    public static string IndustryMapping(OpportunityJSON o){
         String convertedIndustry = '';
         
-        switch on o.Market__c{
+        switch on o.industry{
             when 'Aerospace'{
                 convertedIndustry = 'Manufacturing';
             }
