@@ -362,6 +362,8 @@ public static void prepareNewInboundopptest(){
     OpportunityJSON oppJson= new OpportunityJSON();
     oppJson.APNCRMUniqueIdentifier= 'O999999';
     oppJson.stage='Closed Won';
+    oppJson.industry='Aerospace';
+    oppJson.targetCloseDate='2024-09-01';
     Opportunity o= AceHelperMethodsV2.prepareNewInboundOpp(mdt, oppJson);
     system.assertEquals('O999999', o.APN_CRM_Unique_Identifier__c);
     
