@@ -37,12 +37,13 @@ public class AceHelperMethodsV2Tests{
         System.AssertEquals(oppMapping.get(json2.APNCRMUniqueIdentifier).id,testOpps[1].id);
         System.AssertEquals(oppMapping.get(json3.APNCRMUniqueIdentifier).id,testOpps[2].id);
     }
-       
+   */    
     @isTest(SeeAllData=true)
     public static void UpsertOppsTest(){
         Map<Database.UpsertResult,String> upsertResults = new Map<Database.UpsertResult,String>();
         List<Opportunity> testOpps = Test.loadData(Opportunity.sObjectType, 'AceTestOpps1');
-        AWS__c CRsetting = AWS__c.getValues('AWS Integration Settings');
+        
+
         Map<String,Opportunity> oppMapping = new Map<String,Opportunity>{
             'O999999' => testOpps[0],
             'O999998' => testOpps[1],
@@ -58,7 +59,7 @@ public class AceHelperMethodsV2Tests{
         oppJsonList.add(json3);
         oppJsonList.add(json4);
         
-        upsertResults = AceHelperMethodsV2.UpsertOpps(oppMapping,oppJsonList,CRsetting);
+        upsertResults = AceHelperMethodsV2.UpsertOpps(oppMapping,oppJsonList);
     }
 
     @isTest(SeeAllData=true)
@@ -78,7 +79,7 @@ public class AceHelperMethodsV2Tests{
         }
        
         system.debug(upsertResultMap);
-        AceHelperMethodsV2.ProcessUpsertResults(upsertResultMap,AWS__c.getValues('AWS CMZ Integration Settings'));
+        AceHelperMethodsV2.ProcessUpsertResults(upsertResultMap);
         
         List<AWS_Integration_Log__c> logs1 = [SELECT APN_Id__c, Error__c, Opportunity__c FROM AWS_Integration_Log__c WHERE APN_Id__c = 'O999996']; 
         System.Assert(logs1.size() > 0);
@@ -89,7 +90,7 @@ public class AceHelperMethodsV2Tests{
         List<AWS_Integration_Log__c> logs3 = [SELECT APN_Id__c, Error__c, Opportunity__c FROM AWS_Integration_Log__c WHERE APN_Id__c = 'O999998' OR APN_Id__c = 'O999997']; 
         System.Assert(logs3.size() == 0);          
     }
-    
+    /*
     @isTest
     public static void PrepareJSONRequestTest(){
         OpportunityJSON jsonResult = new OpportunityJSON();

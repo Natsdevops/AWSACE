@@ -1,0 +1,5 @@
+Name,APN_CRM_Unique_Identifier__c,StageName,CloseDate,Status__c,Win_Probabilities__c
+Test1,O999999,Y0,2021-01-01,E0001,10
+Test2,O999998,Y0,2021-01-01,E0001,10
+Test3,O999997,Y0,2021-01-01,E0001,10
+Test4,,Y0,2021-01-01,E0001,10
