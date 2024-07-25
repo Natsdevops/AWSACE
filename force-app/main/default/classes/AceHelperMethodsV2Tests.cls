@@ -41,6 +41,7 @@ public class AceHelperMethodsV2Tests{
     @isTest(SeeAllData=true)
     public static void UpsertOppsTest(){
         Map<Database.UpsertResult,String> upsertResults = new Map<Database.UpsertResult,String>();
+        List<Account> testAccount = Test.loadData(Opportunity.sObjectType, 'AceTestAcc1');
         List<Opportunity> testOpps = Test.loadData(Opportunity.sObjectType, 'AceTestOpps1');
         
 
