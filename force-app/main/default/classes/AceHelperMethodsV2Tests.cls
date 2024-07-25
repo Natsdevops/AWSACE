@@ -367,17 +367,20 @@ public static void prepareNewInboundopptest(){
     
     
 }
-/*
+
 @isTest
 public static void prepareExistingInboundOppTest(){
-    PartnerIntegration__mdt mdt=AceHelperMethodsV2.getIntegrationMetadata();
+    //PartnerIntegration__mdt mdt=AceHelperMethodsV2.getIntegrationMetadata();
     OpportunityJSON oppJson= new OpportunityJSON();
+    Opportunity o= New Opportunity();
     oppJson.APNCRMUniqueIdentifier= 'O999999';
     oppJson.stage='Closed Won';
-    Opportunity o= AceHelperMethodsV2.prepareExistingInboundOpp(mdt, oppJson);
-    system.assertEquals('O999999', o.APN_CRM_Unique_Identifier__c);
+    oppJson.industry='Aerospace';
+    oppJson.targetCloseDate='2024-09-01';
+    Opportunity Opp= AceHelperMethodsV2.prepareExistingInboundOpp(oppJson, o);
+    system.assertEquals('O999999', Opp.APN_CRM_Unique_Identifier__c);
 }
-*/
+
 @isTest
 public statiC void prepareOutboundOpp(){
 
