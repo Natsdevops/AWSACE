@@ -316,7 +316,7 @@ public class AceHelperMethodsV2{
         oppJSON.country = o.Account.BillingCountry;
         oppJSON.contractVehicle = o.Contract_Vehicle__c;
         if(o.AWS_Stage__c == 'Closed Lost'){
-            oddJSON.closedLostReason = 'Other';
+            oppJSON.closedLostReason = 'Other';
         }
         oppJSON.state = o.Account.BillingState;
         oppJSON.primaryContactLastName = o.Owner.LastName;
