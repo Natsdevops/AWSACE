@@ -224,7 +224,7 @@ public class AceHelperMethodsV2Tests{
         firstShared = AceHelperMethodsV2.CheckFirstShared(o);
         System.AssertEquals(False,firstShared);
     }
-    /*
+    
     @isTest
     public static void CheckFirstApprovedTest(){
         Opportunity o = new Opportunity();
@@ -299,6 +299,7 @@ public class AceHelperMethodsV2Tests{
         System.AssertEquals(False,firstLaunched);
     }
     
+    
     @isTest
     public static void CheckFirstClosedLostTest(){
         Opportunity o = new Opportunity();
@@ -326,25 +327,28 @@ public class AceHelperMethodsV2Tests{
         System.AssertEquals(False,firstClosedLost);
     }
 
+    
     @isTest
-    public static void getHistoricalAtosAPNListTest(){
-        List<String> testList = AceHelperMethodsV2.getHistoricalAtosAPNList();
+    public static void getHistoricalAPNListTest(){
+        List<String> testList = AceHelperMethodsV2.getHistoricalAPNList();
         system.Assert(testList.size() > 0);
     }
 
+    
     @isTest
-    public static void isHistoricalAtosAPNTest(){
+    public static void isHistoricalAPNTest(){
         List<String> testList = new List<String>{'O999999','O999998','O999997'};
         OpportunityJSON testOpp1 = new OpportunityJSON();
         OpportunityJSON testOpp2 = new OpportunityJSON();
         testOpp1.APNCRMUniqueIdentifier = 'O999999';
         testOpp2.APNCRMUniqueIdentifier = 'O999996';
-        Boolean test1 = AceHelperMethodsV2.isHistoricalAtosAPN(testList,testOpp1);
-        Boolean test2 = AceHelperMethodsV2.isHistoricalAtosAPN(testList,testOpp2);
+        Boolean test1 = AceHelperMethodsV2.isHistoricalAPN(testList,testOpp1);
+        Boolean test2 = AceHelperMethodsV2.isHistoricalAPN(testList,testOpp2);
         system.Assert(test1);
         system.Assert(!test2);
     }
 
+    /*
     @isTest
     public static void isAtosOppTest(){
         OpportunityJSON testOpp1 = new OpportunityJSON();
