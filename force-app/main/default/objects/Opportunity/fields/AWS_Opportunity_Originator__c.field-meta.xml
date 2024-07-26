@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AWS_Opportunity_Originator__c</fullName>
+    <externalId>false</externalId>
+    <label>AWS Opportunity Originator</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Atos Referral</fullName>
+                <default>true</default>
+                <label>Atos Referral</label>
+            </value>
+            <value>
+                <fullName>AWS Referral</fullName>
+                <default>false</default>
+                <label>AWS Referral</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

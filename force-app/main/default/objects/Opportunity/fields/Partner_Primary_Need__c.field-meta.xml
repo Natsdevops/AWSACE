@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Partner_Primary_Need__c</fullName>
+    <externalId>false</externalId>
+    <label>Partner Primary Need</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Architectural validation</fullName>
+                <default>false</default>
+                <label>Architectural validation</label>
+            </value>
+            <value>
+                <fullName>Business presentation</fullName>
+                <default>false</default>
+                <label>Business presentation</label>
+            </value>
+            <value>
+                <fullName>Competitive Information</fullName>
+                <default>false</default>
+                <label>Competitive Information</label>
+            </value>
+            <value>
+                <fullName>Pricing Assistance</fullName>
+                <default>false</default>
+                <label>Pricing Assistance</label>
+            </value>
+            <value>
+                <fullName>Technical consultation</fullName>
+                <default>false</default>
+                <label>Technical consultation</label>
+            </value>
+            <value>
+                <fullName>Total Cost of Ownership Evaluation</fullName>
+                <default>false</default>
+                <label>Total Cost of Ownership Evaluation</label>
+            </value>
+            <value>
+                <fullName>For Visibility - No Assistance Needed</fullName>
+                <default>false</default>
+                <label>For Visibility - No Assistance Needed</label>
+            </value>
+            <value>
+                <fullName>Deal support</fullName>
+                <default>false</default>
+                <label>Deal support</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

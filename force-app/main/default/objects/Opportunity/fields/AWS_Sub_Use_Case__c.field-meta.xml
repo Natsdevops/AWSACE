@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AWS_Sub_Use_Case__c</fullName>
+    <externalId>false</externalId>
+    <label>AWS Sub Use Case</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Computer Vision - Video Analysis, OCR, Medical Imaging, Face Detection, etc…</fullName>
+                <default>false</default>
+                <label>Computer Vision - Video Analysis, OCR, Medical Imaging, Face Detection, etc…</label>
+            </value>
+            <value>
+                <fullName>Natural Language Understanding = Sentiment Analysis. Topic modeling, Entity Recognition, Language recognition, etc..</fullName>
+                <default>false</default>
+                <label>Natural Language Understanding = Sentiment Analysis. Topic modeling, Entity Recognition, Language recognition, etc..</label>
+            </value>
+            <value>
+                <fullName>Language Translation</fullName>
+                <default>false</default>
+                <label>Language Translation</label>
+            </value>
+            <value>
+                <fullName>Text to speed, speed to text</fullName>
+                <default>false</default>
+                <label>Text to speed, speed to text</label>
+            </value>
+            <value>
+                <fullName>Recommendations</fullName>
+                <default>false</default>
+                <label>Recommendations</label>
+            </value>
+            <value>
+                <fullName>Forecasting - time series analysis, demand, etc..</fullName>
+                <default>false</default>
+                <label>Forecasting - time series analysis, demand, etc..</label>
+            </value>
+            <value>
+                <fullName>Personalization</fullName>
+                <default>false</default>
+                <label>Personalization</label>
+            </value>
+            <value>
+                <fullName>Conversational Interfaces</fullName>
+                <default>false</default>
+                <label>Conversational Interfaces</label>
+            </value>
+            <value>
+                <fullName>Fraud and ANomaly Detection</fullName>
+                <default>false</default>
+                <label>Fraud and ANomaly Detection</label>
+            </value>
+            <value>
+                <fullName>Big data analytics &amp; data science</fullName>
+                <default>false</default>
+                <label>Big data analytics &amp; data science</label>
+            </value>
+            <value>
+                <fullName>Business Intelligence &amp; data vi</fullName>
+                <default>false</default>
+                <label>Business Intelligence &amp; data vi</label>
+            </value>
+            <value>
+                <fullName>Data integration &amp; ETL</fullName>
+                <default>false</default>
+                <label>Data integration &amp; ETL</label>
+            </value>
+            <value>
+                <fullName>Data Warehouse</fullName>
+                <default>false</default>
+                <label>Data Warehouse</label>
+            </value>
+            <value>
+                <fullName>Real-time Analytics</fullName>
+                <default>false</default>
+                <label>Real-time Analytics</label>
+            </value>
+            <value>
+                <fullName>Data Lake</fullName>
+                <default>false</default>
+                <label>Data Lake</label>
+            </value>
+            <value>
+                <fullName>Microsoft Apps</fullName>
+                <default>false</default>
+                <label>Microsoft Apps</label>
+            </value>
+            <value>
+                <fullName>Oracle Production</fullName>
+                <default>false</default>
+                <label>Oracle Production</label>
+            </value>
+            <value>
+                <fullName>Oracle Non-Prod</fullName>
+                <default>false</default>
+                <label>Oracle Non-Prod</label>
+            </value>
+            <value>
+                <fullName>SAP Production</fullName>
+                <default>false</default>
+                <label>SAP Production</label>
+            </value>
+            <value>
+                <fullName>SAP Non-Prod</fullName>
+                <default>false</default>
+                <label>SAP Non-Prod</label>
+            </value>
+            <value>
+                <fullName>Mainframe Modernization</fullName>
+                <default>false</default>
+                <label>Mainframe Modernization</label>
+            </value>
+            <value>
+                <fullName>Contact Center</fullName>
+                <default>false</default>
+                <label>Contact Center</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+            <value>
+                <fullName>Continuous Integration &amp; Continuous Delivery (CICD)</fullName>
+                <default>false</default>
+                <label>Continuous Integration &amp; Continuous Delivery (CICD)</label>
+            </value>
+            <value>
+                <fullName>Monitoring, logging and performance</fullName>
+                <default>false</default>
+                <label>Monitoring, logging and performance</label>
+            </value>
+            <value>
+                <fullName>Infrastructure as code</fullName>
+                <default>false</default>
+                <label>Infrastructure as code</label>
+            </value>
+            <value>
+                <fullName>Productivity Applications</fullName>
+                <default>false</default>
+                <label>Productivity Applications</label>
+            </value>
+            <value>
+                <fullName>AWS Lambda</fullName>
+                <default>false</default>
+                <label>AWS Lambda</label>
+            </value>
+            <value>
+                <fullName>Kubernetes</fullName>
+                <default>false</default>
+                <label>Kubernetes</label>
+            </value>
+            <value>
+                <fullName>OpenShift</fullName>
+                <default>false</default>
+                <label>OpenShift</label>
+            </value>
+            <value>
+                <fullName>Desktop &amp; App Streaming</fullName>
+                <default>false</default>
+                <label>Desktop &amp; App Streaming</label>
+            </value>
+            <value>
+                <fullName>Mobile Device and Application Management</fullName>
+                <default>false</default>
+                <label>Mobile Device and Application Management</label>
+            </value>
+            <value>
+                <fullName>End User Productivity Apps</fullName>
+                <default>false</default>
+                <label>End User Productivity Apps</label>
+            </value>
+            <value>
+                <fullName>Oil &amp; Gas</fullName>
+                <default>false</default>
+                <label>Oil &amp; Gas</label>
+            </value>
+            <value>
+                <fullName>Utilities</fullName>
+                <default>false</default>
+                <label>Utilities</label>
+            </value>
+            <value>
+                <fullName>Insurance</fullName>
+                <default>false</default>
+                <label>Insurance</label>
+            </value>
+            <value>
+                <fullName>PCI</fullName>
+                <default>false</default>
+                <label>PCI</label>
+            </value>
+            <value>
+                <fullName>Payment Processing</fullName>
+                <default>false</default>
+                <label>Payment Processing</label>
+            </value>
+            <value>
+                <fullName>Banking</fullName>
+                <default>false</default>
+                <label>Banking</label>
+            </value>
+            <value>
+                <fullName>Capital Markets</fullName>
+                <default>false</default>
+                <label>Capital Markets</label>
+            </value>
+            <value>
+                <fullName>Risk &amp; Compliance</fullName>
+                <default>false</default>
+                <label>Risk &amp; Compliance</label>
+            </value>
+            <value>
+                <fullName>Big Data/Grid</fullName>
+                <default>false</default>
+                <label>Big Data/Grid</label>
+            </value>
+            <value>
+                <fullName>Market Data &amp; Financial Content</fullName>
+                <default>false</default>
+                <label>Market Data &amp; Financial Content</label>
+            </value>
+            <value>
+                <fullName>Core Systems</fullName>
+                <default>false</default>
+                <label>Core Systems</label>
+            </value>
+            <value>
+                <fullName>Digital (AI/ML, Predicative Analytics)</fullName>
+                <default>false</default>
+                <label>Digital (AI/ML, Predicative Analytics)</label>
+            </value>
+            <value>
+                <fullName>Genomics</fullName>
+                <default>false</default>
+                <label>Genomics</label>
+            </value>
+            <value>
+                <fullName>HIPAA</fullName>
+                <default>false</default>
+                <label>HIPAA</label>
+            </value>
+            <value>
+                <fullName>HITRUST</fullName>
+                <default>false</default>
+                <label>HITRUST</label>
+            </value>
+            <value>
+                <fullName>GxP</fullName>
+                <default>false</default>
+                <label>GxP</label>
+            </value>
+            <value>
+                <fullName>GDPR</fullName>
+                <default>false</default>
+                <label>GDPR</label>
+            </value>
+            <value>
+                <fullName>Biopharma</fullName>
+                <default>false</default>
+                <label>Biopharma</label>
+            </value>
+            <value>
+                <fullName>Med Device</fullName>
+                <default>false</default>
+                <label>Med Device</label>
+            </value>
+            <value>
+                <fullName>Payer</fullName>
+                <default>false</default>
+                <label>Payer</label>
+            </value>
+            <value>
+                <fullName>Provider</fullName>
+                <default>false</default>
+                <label>Provider</label>
+            </value>
+            <value>
+                <fullName>Product Design and Simulation</fullName>
+                <default>false</default>
+                <label>Product Design and Simulation</label>
+            </value>
+            <value>
+                <fullName>Electronic Design Automation</fullName>
+                <default>false</default>
+                <label>Electronic Design Automation</label>
+            </value>
+            <value>
+                <fullName>Architecture Engineering and Construction</fullName>
+                <default>false</default>
+                <label>Architecture Engineering and Construction</label>
+            </value>
+            <value>
+                <fullName>Other Engineering</fullName>
+                <default>false</default>
+                <label>Other Engineering</label>
+            </value>
+            <value>
+                <fullName>Computer Aided Engineering</fullName>
+                <default>false</default>
+                <label>Computer Aided Engineering</label>
+            </value>
+            <value>
+                <fullName>Computer Aided Manufacturing</fullName>
+                <default>false</default>
+                <label>Computer Aided Manufacturing</label>
+            </value>
+            <value>
+                <fullName>Product Lifecycle Management</fullName>
+                <default>false</default>
+                <label>Product Lifecycle Management</label>
+            </value>
+            <value>
+                <fullName>Production Planning</fullName>
+                <default>false</default>
+                <label>Production Planning</label>
+            </value>
+            <value>
+                <fullName>Production - Automation</fullName>
+                <default>false</default>
+                <label>Production - Automation</label>
+            </value>
+            <value>
+                <fullName>Production - SCADA</fullName>
+                <default>false</default>
+                <label>Production - SCADA</label>
+            </value>
+            <value>
+                <fullName>Production - MES</fullName>
+                <default>false</default>
+                <label>Production - MES</label>
+            </value>
+            <value>
+                <fullName>Industrial IoT</fullName>
+                <default>false</default>
+                <label>Industrial IoT</label>
+            </value>
+            <value>
+                <fullName>Industrial Asset Management</fullName>
+                <default>false</default>
+                <label>Industrial Asset Management</label>
+            </value>
+            <value>
+                <fullName>Production Logistics</fullName>
+                <default>false</default>
+                <label>Production Logistics</label>
+            </value>
+            <value>
+                <fullName>Manufacturing Engineering System</fullName>
+                <default>false</default>
+                <label>Manufacturing Engineering System</label>
+            </value>
+            <value>
+                <fullName>Connected Space</fullName>
+                <default>false</default>
+                <label>Connected Space</label>
+            </value>
+            <value>
+                <fullName>Connected Transport</fullName>
+                <default>false</default>
+                <label>Connected Transport</label>
+            </value>
+            <value>
+                <fullName>Connected Commerce</fullName>
+                <default>false</default>
+                <label>Connected Commerce</label>
+            </value>
+            <value>
+                <fullName>Connected Operations</fullName>
+                <default>false</default>
+                <label>Connected Operations</label>
+            </value>
+            <value>
+                <fullName>Connected Health</fullName>
+                <default>false</default>
+                <label>Connected Health</label>
+            </value>
+            <value>
+                <fullName>Content Creation &amp; Processing</fullName>
+                <default>false</default>
+                <label>Content Creation &amp; Processing</label>
+            </value>
+            <value>
+                <fullName>Broadcast &amp; OTT</fullName>
+                <default>false</default>
+                <label>Broadcast &amp; OTT</label>
+            </value>
+            <value>
+                <fullName>Content Management &amp; Distribution</fullName>
+                <default>false</default>
+                <label>Content Management &amp; Distribution</label>
+            </value>
+            <value>
+                <fullName>High Performance Technical Computing (HPTC)</fullName>
+                <default>false</default>
+                <label>High Performance Technical Computing (HPTC)</label>
+            </value>
+            <value>
+                <fullName>High Performance Business Computing (HPBC)</fullName>
+                <default>false</default>
+                <label>High Performance Business Computing (HPBC)</label>
+            </value>
+            <value>
+                <fullName>High Throughput Computing (HTC)</fullName>
+                <default>false</default>
+                <label>High Throughput Computing (HTC)</label>
+            </value>
+            <value>
+                <fullName>Database Migration</fullName>
+                <default>false</default>
+                <label>Database Migration</label>
+            </value>
+            <value>
+                <fullName>Application Migration</fullName>
+                <default>false</default>
+                <label>Application Migration</label>
+            </value>
+            <value>
+                <fullName>Direct Connect</fullName>
+                <default>false</default>
+                <label>Direct Connect</label>
+            </value>
+            <value>
+                <fullName>Archive</fullName>
+                <default>false</default>
+                <label>Archive</label>
+            </value>
+            <value>
+                <fullName>Backup</fullName>
+                <default>false</default>
+                <label>Backup</label>
+            </value>
+            <value>
+                <fullName>Primary Storage</fullName>
+                <default>false</default>
+                <label>Primary Storage</label>
+            </value>
+            <value>
+                <fullName>Disaster Recovery</fullName>
+                <default>false</default>
+                <label>Disaster Recovery</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

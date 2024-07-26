@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AWS_Use_Case__c</fullName>
+    <externalId>false</externalId>
+    <label>AWS Use Case</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>AI/Machine Learning</fullName>
+                <default>false</default>
+                <label>AI/Machine Learning</label>
+            </value>
+            <value>
+                <fullName>Big Data</fullName>
+                <default>false</default>
+                <label>Big Data</label>
+            </value>
+            <value>
+                <fullName>Business Applications</fullName>
+                <default>false</default>
+                <label>Business Applications</label>
+            </value>
+            <value>
+                <fullName>Cloud Management Tools &amp; DevOps</fullName>
+                <default>false</default>
+                <label>Cloud Management Tools &amp; DevOps</label>
+            </value>
+            <value>
+                <fullName>Tools &amp; DevOps</fullName>
+                <default>false</default>
+                <label>Tools &amp; DevOps</label>
+            </value>
+            <value>
+                <fullName>Containers &amp; Serverless</fullName>
+                <default>false</default>
+                <label>Containers &amp; Serverless</label>
+            </value>
+            <value>
+                <fullName>End User Computing</fullName>
+                <default>false</default>
+                <label>End User Computing</label>
+            </value>
+            <value>
+                <fullName>Energy</fullName>
+                <default>false</default>
+                <label>Energy</label>
+            </value>
+            <value>
+                <fullName>Financial Services</fullName>
+                <default>false</default>
+                <label>Financial Services</label>
+            </value>
+            <value>
+                <fullName>Healthcare &amp; Life Sciences</fullName>
+                <default>false</default>
+                <label>Healthcare &amp; Life Sciences</label>
+            </value>
+            <value>
+                <fullName>Hybrid Application Platform</fullName>
+                <default>false</default>
+                <label>Hybrid Application Platform</label>
+            </value>
+            <value>
+                <fullName>Industrial Software</fullName>
+                <default>false</default>
+                <label>Industrial Software</label>
+            </value>
+            <value>
+                <fullName>IOT</fullName>
+                <default>false</default>
+                <label>IOT</label>
+            </value>
+            <value>
+                <fullName>Media &amp; High Performance Computing (HPC)</fullName>
+                <default>false</default>
+                <label>Media &amp; High Performance Computing (HPC)</label>
+            </value>
+            <value>
+                <fullName>Migration</fullName>
+                <default>false</default>
+                <label>Migration</label>
+            </value>
+            <value>
+                <fullName>Networking</fullName>
+                <default>false</default>
+                <label>Networking</label>
+            </value>
+            <value>
+                <fullName>Security</fullName>
+                <default>false</default>
+                <label>Security</label>
+            </value>
+            <value>
+                <fullName>Storage</fullName>
+                <default>false</default>
+                <label>Storage</label>
+            </value>
+            <value>
+                <fullName>AI</fullName>
+                <default>false</default>
+                <label>AI</label>
+            </value>
+            <value>
+                <fullName>Data Residency</fullName>
+                <default>false</default>
+                <label>Data Residency</label>
+            </value>
+            <value>
+                <fullName>Training</fullName>
+                <default>false</default>
+                <label>Training</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
