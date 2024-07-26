@@ -334,7 +334,7 @@ public class AceHelperMethodsV2Tests{
         system.Assert(testList.size() > 0);
     }
 
-    /*
+    
     @isTest
     public static void isHistoricalAtosAPNTest(){
         List<String> testList = new List<String>{'O999999','O999998','O999997'};
@@ -348,6 +348,7 @@ public class AceHelperMethodsV2Tests{
         system.Assert(!test2);
     }
 
+    /*
     @isTest
     public static void isAtosOppTest(){
         OpportunityJSON testOpp1 = new OpportunityJSON();
