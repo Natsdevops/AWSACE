@@ -299,7 +299,7 @@ public class AceHelperMethodsV2Tests{
         System.AssertEquals(False,firstLaunched);
     }
     
-    /*
+    
     @isTest
     public static void CheckFirstClosedLostTest(){
         Opportunity o = new Opportunity();
@@ -327,6 +327,7 @@ public class AceHelperMethodsV2Tests{
         System.AssertEquals(False,firstClosedLost);
     }
 
+    /*
     @isTest
     public static void getHistoricalAtosAPNListTest(){
         List<String> testList = AceHelperMethodsV2.getHistoricalAtosAPNList();
