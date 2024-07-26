@@ -238,7 +238,7 @@ public class AceHelperMethodsV2{
         o.status__c = 'E0001';
         o.Win_Probabilities__c = '10';
         o.Project_Description__c = json.projectDescription;                
-        o.market__c = IndustryMapping(json);
+        o.AWS_Industry__c = json.industry;
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
         o.AWS_Acceptance_Status__c = json.status;
         o.Opportunity_ownership__c = json.opportunityOwnership;
@@ -277,7 +277,7 @@ public class AceHelperMethodsV2{
         o.AWS_Use_Case__c = json.useCase;
         o.Project_Description__c = json.projectDescription;
         o.AWS_Opportunity_Name__c = json.partnerProjectTitle;
-        o.market__c = IndustryMapping(json);
+        o.AWS_Industry__c = json.industry;
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
         o.AWS_Acceptance_Status__c = json.status;
         o.Opportunity_ownership__c = json.opportunityOwnership;
@@ -308,7 +308,7 @@ public class AceHelperMethodsV2{
         oppJSON.postalCode = o.Account.BillingPostalCode;           
         oppJSON.partnerPrimaryNeedFromAws = o.Partner_Primary_Need__c;            
         oppJSON.partnerCrmUniqueIdentifier = o.id;
-        oppJSON.industry = 'Aerospace';
+        oppJSON.industry = o.AWS_Industry__c;
         oppJSON.expectedMonthlyAwsRevenue = (Integer) o.Expected_Monthly_AWS_Revenue__c;
         oppJSON.deliveryModel = o.Delivery_Model__c;
         oppJSON.customerWebsite = o.Account.Website;
@@ -513,107 +513,6 @@ public class AceHelperMethodsV2{
         system.debug('isHistoricalAtos: ' + isHistoricalAtos);
         return isHistoricalAtos;
     }
-    
-    public static string IndustryMapping(OpportunityJSON o){
-        String convertedIndustry = '';
-        
-        switch on o.industry{
-            when 'Aerospace'{
-                convertedIndustry = 'Manufacturing';
-            }
-
-            when 'Agriculture'{
-                convertedIndustry = 'Resources & Services';
-            }
-            when 'Automotive'{
-
-                convertedIndustry = 'Manufacturing';
-            }
-            when 'Computers & Electronics'{
-                convertedIndustry = 'Telecom, Media & Technology';
-            }
-           
-            when 'Consumer Goods'{
-
-                convertedIndustry = 'Manufacturing';
-            }
-            
-            
-            when 'Education'{
-                convertedIndustry = 'Resources & Services';
-            }
-            when 'Financial Services'{
-
-                convertedIndustry = 'Financial Services & Insurance';
-            }
-            when 'Gaming'{
-                convertedIndustry = 'Telecom, Media & Technology';
-            }
-            when 'Government'{
-                convertedIndustry = 'Public Sector & Defense';
-            }
-            when 'Healthcare' {
-
-                convertedIndustry = 'Health & Life Sciences';
-            }
-            when 'Hospitality'{
-                convertedIndustry = 'Resources & Services';
-            }
-            when 'Life Sciences'{
-                convertedIndustry = 'Health & Life Sciences';
-            }
-            when 'Manufacturing' {
-
-                convertedIndustry = 'Manufacturing';
-            }
-            when 'Marketing & Advertising'{
-                convertedIndustry = 'Resources & Services';
-            }
-            when 'Media & Entertainment'{
-                convertedIndustry = 'Telecom, Media & Technology';
-            }
-            when 'Mining'{
-                convertedIndustry='Resources & Services';
-            }
-            when 'Non-Profit Organization'{
-                convertedIndustry = 'Public Sector & Defense';
-            }
-            when 'Energy - Oil & Gas'{
-                convertedIndustry = 'Resources & Services';
-            }
-            when 'Other'{
-                convertedIndustry = 'Resources & Services';
-            }
-            when 'Energy - Power & Utilities'{
-                convertedIndustry = 'Resources & Services';
-            }
-            when 'Professional Services'{
-                convertedIndustry = 'Resources & Services';
-            }
-            when 'Real Estate & Construction'{
-                convertedIndustry = 'Manufacturing';
-            }
-            when 'Retail'{
-                convertedIndustry = 'Manufacturing';
-            }
-            when 'Software & Internet'{
-                convertedIndustry = 'Telecom, Media & Technology';
-            }
-            when 'Telecommunications'{
-                convertedIndustry = 'Telecom, Media & Technology';
-            }
-            
-                
-            
-            when 'Wholesale & Distribution'{
-                convertedIndustry = 'Resources & Services';
-            }
-            
-        }
-        System.debug('Convert Industry:' + convertedIndustry);
-        return convertedIndustry;
-    }
-
 //---------------------------------API REQUESTS ----------------------------------------      
             
     public static String putUpdateCallout(List<OpportunityJSON> oppJSONScope){

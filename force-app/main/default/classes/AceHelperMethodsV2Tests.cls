@@ -159,49 +159,7 @@ public class AceHelperMethodsV2Tests{
     }
 
 //-----------------------SECONDARY FUNCTIONS-----------------------------------------
-    @isTest
-    public static void AllowAWSUpdatesTest(){
-        Opportunity o = new Opportunity();
-        Boolean allowAWSUpdate;
-        
-        o = (Opportunity) Json.deserialize('{"name":"Test", "isClosed": false}', Opportunity.class);
-        allowAWSUpdate = AceHelperMethodsV2.AllowAWSUpdates(o);
-        System.AssertEquals(True,allowAWSUpdate);
-        
-        o = (Opportunity) Json.deserialize('{"name":"Test", "isClosed": true}', Opportunity.class);                                                
-        allowAWSUpdate = AceHelperMethodsV2.AllowAWSUpdates(o);
-        System.AssertEquals(False,allowAWSUpdate);
-    }
-    
-    @isTest(SeeAllData=true)
-    public static void AllowStageAndCloseDateUpdatesTest(){
-        Opportunity o = new Opportunity();
-        Boolean AllowStageAndCloseDateUpdates;
-        AWS__c setting = AWS__c.getValues('AWS Integration Settings');
-        String integrationUserId = setting.Integration_User_Id__c;
-        
-        o = (Opportunity) Json.deserialize('{"name":"Test","APN_CRM_Unique_Identifier__c":null,"ownerId":"' + integrationUserId + '"}', Opportunity.class);
-        AllowStageAndCloseDateUpdates = AceHelperMethodsV2.AllowStageAndCloseDateUpdates(o,setting);
-        System.AssertEquals(True,AllowStageAndCloseDateUpdates);
 
-        o = (Opportunity) Json.deserialize('{"name":"Test","APN_CRM_Unique_Identifier__c":"123456789101"}', Opportunity.class);
-        AllowStageAndCloseDateUpdates = AceHelperMethodsV2.AllowStageAndCloseDateUpdates(o,setting);
-        System.AssertEquals(False,AllowStageAndCloseDateUpdates);
-    }
-    
-    @isTest
-    public static void CheckNameLengthTest(){
-        OpportunityJson json = new OpportunityJson();
-        String name = '';
-        
-        json.partnerProjectTitle = 'This partner project title is longer than fifty characters and should be trimmed';
-        name = AceHelperMethodsV2.CheckNameLength(json);
-        System.AssertEquals(json.partnerProjectTitle.left(50),name);
-        
-        json.partnerProjectTitle = 'This partner project is less than 50 characters';
-        name = AceHelperMethodsV2.CheckNameLength(json);
-        System.AssertEquals(json.partnerProjectTitle,name);            
-    }
     */
     @isTest
     public static void CheckFirstSharedTest(){
@@ -347,20 +305,6 @@ public class AceHelperMethodsV2Tests{
         system.Assert(test1);
         system.Assert(!test2);
     }
-
-    /*
-    @isTest
-    public static void isAtosOppTest(){
-        OpportunityJSON testOpp1 = new OpportunityJSON();
-        OpportunityJSON testOpp2 = new OpportunityJSON();
-        testOpp1.partnerProjectTitle = '#Eviden - Test Opportunity 1';
-        testOpp2.partnerProjectTitle = 'Test Opportunity 2';
-        Boolean test1 = AceHelperMethodsV2.isAtosOpp(testOpp1);
-        Boolean test2 = AceHelperMethodsV2.isAtosOpp(testOpp2);
-        system.Assert(test1);
-        system.Assert(!test2);
-    }
-*/
 
 @isTest
 public static void prepareNewInboundopptest(){
