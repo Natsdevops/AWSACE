@@ -17,27 +17,8 @@ public class AceHelperMethodsV2Tests{
         System.Assert(processedPath.startsWith('OpportunityBatch-' + Date.Today().month() + '-' + Date.Today().day() + '-' + Date.Today().year()));
         System.Assert(processedPath.endsWith('_result.json'));
     }  
-/*  
 //-----------------------CORE FUNCTIONS----------------------------------------------
-    @isTest
-    public static void CreateAPNIdtoOppMappingTest(){
-        Map<String,Opportunity> oppMapping = new Map<String,Opportunity>();       
-        List<Opportunity> testOpps = Test.loadData(Opportunity.sObjectType, 'AceTestOpps1');        
-        List<OpportunityJSON> oppJsonList = new List<OpportunityJSON>();
-        OpportunityJSON json1 = (OpportunityJSON) Json.deserialize('{"name":"Test1","APNCRMUniqueIdentifier":"O999999","partnerCrmUniqueIdentifier":"' + testOpps[0].id + '"}',OpportunityJSON.Class);
-        OpportunityJSON json2 = (OpportunityJSON) Json.deserialize('{"name":"Test2","APNCRMUniqueIdentifier":"O999998","partnerCrmUniqueIdentifier":"' + testOpps[1].id + '"}',OpportunityJSON.Class);
-        OpportunityJSON json3 = (OpportunityJSON) Json.deserialize('{"name":"Test3","APNCRMUniqueIdentifier":"O999997","partnerCrmUniqueIdentifier":"' + testOpps[2].id + '"}',OpportunityJSON.Class);
-        oppJsonList.add(json1);
-        oppJsonList.add(json2);
-        oppJsonList.add(json3);
-         
-        oppMapping = AceHelperMethodsV2.CreateAPNIdtoOppMapping(oppJsonList);
-        System.AssertEquals(oppMapping.keySet().size(),3);
-        System.AssertEquals(oppMapping.get(json1.APNCRMUniqueIdentifier).id,testOpps[0].id);
-        System.AssertEquals(oppMapping.get(json2.APNCRMUniqueIdentifier).id,testOpps[1].id);
-        System.AssertEquals(oppMapping.get(json3.APNCRMUniqueIdentifier).id,testOpps[2].id);
-    }
-   */    
+    
     @isTest(SeeAllData=true)
     public static void UpsertOppsTest(){
         Map<Database.UpsertResult,String> upsertResults = new Map<Database.UpsertResult,String>();
@@ -91,76 +72,9 @@ public class AceHelperMethodsV2Tests{
         List<AWS_Integration_Log__c> logs3 = [SELECT APN_Id__c, Error__c, Opportunity__c FROM AWS_Integration_Log__c WHERE APN_Id__c = 'O999998' OR APN_Id__c = 'O999997']; 
         System.Assert(logs3.size() == 0);          
     }
-    /*
-    @isTest
-    public static void PrepareJSONRequestTest(){
-        OpportunityJSON jsonResult = new OpportunityJSON();
-        Opportunity opp = (Opportunity) Json.deserialize('{"name":"test1","APN_CRM_Unique_Identifier__c":"O999996"}',Opportunity.Class);
-        Date endDate = date.parse('1/1/2020');
-        jsonResult = AceHelperMethodsV2.PrepareJSONRequest(opp);
-        
-        System.AssertEquals(opp.name,jsonResult.name);
-        System.AssertEquals(opp.APN_CRM_Unique_Identifier__c,jsonResult.APNCRMUniqueIdentifier);
-    }
-    
-    @isTest
-    public static void ReadCRUpdateResultsTest(){
-        List<OpportunityResultJSON> jsonResults = new List<OpportunityResultJSON>();
-        Map<String,String> idMap = new Map<String,String>{
-            '0065I000008thZaQAI' => 'O874286',
-            '0065I000008tZt5QAE' => 'O916682',
-            '0065I000008spjlQAA' => null   
-        };        
-        String jsonString = '{"success":"Partial","spmsId":"1450","isApiError":false,"inboundApiResults":[{"warnings":null,"partnerCrmUniqueIdentifier":"0065I000008thZaQAI","isSuccess":true,"errors":null,"apnCrmUniqueIdentifier":"O874286"},{"warnings":null,"partnerCrmUniqueIdentifier":"0065I000008tZt5QAE","isSuccess":false,"errors":["Expected Monthly AWS Revenue cannot be blank or 0","Save failed due to one of the below reasons: \n1 Marking opportunity as Launched without AWS Account ID \n2 Removing/Deleting AWS Account ID from opportunity marked as Launched"],"apnCrmUniqueIdentifier":"O916682"},{"warnings":null,"partnerCrmUniqueIdentifier":"0065I000008spjlQAA","isSuccess":false,"errors":["Required: Postal Code","Estimated AWS Monthly Recurring Revenue cannot be blank or 0"],"apnCrmUniqueIdentifier":null}],"fileName":"opportunity-inbound/OpportunityBatch-12-20-2021-22h-0m-47s.json","fileApnProcessedDT":"2021-12-20T22:00:51.201Z","apiErrors":null}';
-        
-        jsonResults = AceHelperMethodsV2.ReadCRUpdateResults(jsonString);
-        
-        for(OpportunityResultJSON result : jsonResults){
-            System.AssertEquals(idMap.get(result.partnerCrmUniqueIdentifier),result.apnCrmUniqueIdentifier);        
-        }
-        
-    }
-    
-    @isTest
-    public static void ProcessCRUpdateResultsTest(){
-        List<Opportunity> testOpps = Test.loadData(Opportunity.sObjectType, 'AceTestOpps1');
-        List<OpportunityResultJSON> results = new List<OpportunityResultJSON>();
-        OpportunityResultJSON result1 = (OpportunityResultJSON) Json.deserialize('{"warnings":null,"partnerCrmUniqueIdentifier":"' + testOpps[0].id + '","isSuccess":true,"errors":null,"apnCrmUniqueIdentifier":"O999999"}',OpportunityResultJSON.class);
-        OpportunityResultJSON result2 = (OpportunityResultJSON) Json.deserialize('{"warnings":null,"partnerCrmUniqueIdentifier":"' + testOpps[1].id + '","isSuccess":false,"errors":["The postal code is invalid for country United Kingdom, United Kingdom postal code must be in A(A)N(A/N)NAA OR A(A)N(A/N) NAA format.","Target Close Date cannot be in the past.","Target Close Date cannot be in the past."],"apnCrmUniqueIdentifier":"O999998"}',OpportunityResultJSON.class);
-        OpportunityResultJSON result3 = (OpportunityResultJSON) Json.deserialize('{"warnings":null,"partnerCrmUniqueIdentifier":"' + testOpps[3].id + '","isSuccess":true,"errors":null,"apnCrmUniqueIdentifier":"O999996"}',OpportunityResultJSON.class);
-        OpportunityResultJSON result4 = (OpportunityResultJSON) Json.deserialize('{"warnings":null,"partnerCrmUniqueIdentifier":"' + testOpps[2].id + '","isSuccess":false,"errors":["The postal code is invalid"],"apnCrmUniqueIdentifier":null}',OpportunityResultJSON.class);
-        testOpps[2].APN_CRM_Unique_Identifier__c = null;
-        results.add(result1);
-        results.add(result2);
-        results.add(result3);
-        results.add(result4);
-        
-        System.AssertEquals(testOpps[0].AWS_Update_Success__c,null);
-        System.AssertEquals(testOpps[1].AWS_Update_Success__c,null);
-        System.AssertEquals(testOpps[2].AWS_Update_Success__c,null);
-        System.Assert(testOpps[2].APN_CRM_Unique_Identifier__c == null);
-        System.AssertEquals(testOpps[3].AWS_Update_Success__c,null);
-        System.Assert(testOpps[3].APN_CRM_Unique_Identifier__c == null);
-        
-        AceHelperMethodsV2.ProcessCRUpdateResults(results);
-        
-        List<Opportunity> test1 = [SELECT id, AWS_Update_Success__c FROM Opportunity WHERE id = :testOpps[0].id];
-        System.AssertEquals(test1[0].AWS_Update_Success__c,'true');
-        
-        List<Opportunity> test2 = [SELECT id, AWS_Update_Success__c FROM Opportunity WHERE id = :testOpps[1].id];
-        System.AssertEquals(test2[0].AWS_Update_Success__c,'false');
-        
-        List<Opportunity> test3 = [SELECT id, AWS_Update_Success__c, APN_CRM_Unique_Identifier__c FROM Opportunity WHERE id = :testOpps[3].id];
-        System.AssertEquals(test3[0].AWS_Update_Success__c,'true');
-        System.AssertEquals(test3[0].APN_CRM_Unique_Identifier__c,'O999996');
-        
-        List<Opportunity> test4 = [SELECT id, AWS_Update_Success__c, APN_CRM_Unique_Identifier__c FROM Opportunity WHERE id = :testOpps[2].id];
-        System.AssertEquals(test4[0].AWS_Update_Success__c,'false');
-    }
 
 //-----------------------SECONDARY FUNCTIONS-----------------------------------------
 
-    */
     @isTest
     public static void CheckFirstSharedTest(){
         Opportunity o = new Opportunity();
@@ -344,5 +258,193 @@ public statiC void prepareOutboundOpp(){
 
     system.assertEquals('O999999', oppJson.APNCRMUniqueIdentifier);
 }
+@isTest
+    static void testConvertJsonWithValidData() {
+        // Sample JSON string with valid data
+        String jsonString = '{"opportunities":[{"partnerCrmUniqueIdentifier":"123","partnerProjectTitle":"Project A","APNCRMUniqueIdentifier":"APN123"},{"partnerCrmUniqueIdentifier":"124","partnerProjectTitle":"Project B","APNCRMUniqueIdentifier":"APN124"}]}';
+
+        // Execute the test using the convertJson method
+        Test.startTest();
+        List<OpportunityJSON> result = AceHelperMethodsV2.convertJson(jsonString);
+        Test.stopTest();
+
+        // Verify the results
+        System.assertEquals(2, result.size());
+        System.assertEquals('123', result[0].partnerCrmUniqueIdentifier);
+        System.assertEquals('124', result[1].partnerCrmUniqueIdentifier);
+    }
+
+    @isTest
+    static void testConvertJsonWithHistoricalData() {
+        // Sample JSON string with historical data
+        String jsonString = '{"opportunities":[{"partnerCrmUniqueIdentifier":"123","partnerProjectTitle":"Project A","APNCRMUniqueIdentifier":"APN123"},{"partnerCrmUniqueIdentifier":"124","partnerProjectTitle":"Project B","APNCRMUniqueIdentifier":"APN124"}]}';
+
+        // Update the static resource to include historical APNs
+        // Note: You must ensure that the StaticResource 'AceHistoricalAPN' contains 'APN123' for this test to work as expected.
+
+        // Execute the test using the convertJson method
+        Test.startTest();
+        List<OpportunityJSON> result = AceHelperMethodsV2.convertJson(jsonString);
+        Test.stopTest();
+
+        // Verify the results
+        System.assertEquals(2, result.size());
+        System.assertEquals('123', result[0].partnerCrmUniqueIdentifier);
+    }
+
+    @isTest
+    static void testConvertJsonWithInvalidData() {
+        // Sample JSON string with invalid data (missing required fields)
+        String jsonString = '{"opportunities":[{"partnerCrmUniqueIdentifier":"123","partnerProjectTitle":"Project A"}]}';
+
+        // Execute the test using the convertJson method
+        Test.startTest();
+        List<OpportunityJSON> result = AceHelperMethodsV2.convertJson(jsonString);
+        Test.stopTest();
+
+        // Verify the results
+        System.assertEquals(1, result.size(), 'The result size should be zero due to invalid data');
+    }
+    
+        @isTest
+    static void testProcessOutboundUpdateResults() {
+        
+        Bkp_Utils.createByPassVR();
+
+        //Custom Setting - ByPass ProcessBuilder
+        ByPass_Procss_Builders__c process=new ByPass_Procss_Builders__c(Bypass_Process_Builders__c=true);
+        insert process;
+        
+        //Custom Setting - ByPass Workflow
+        WorkflowRuleBypassSettings__c work=new WorkflowRuleBypassSettings__c(
+            ByPassAllWorkflow__c=true,
+            ByPassWorkflowDataMig__c=true
+        );
+            
+            // Create products. Trigger will create price book entries
+            List<Product2> products = new List<Product2>();
+        for(Integer i=0; i<10; i++){
+            Product2 p = new Product2();
+            p.Name='Generic Product'+i;
+            p.ProductCode='Code'+i;
+            p.IsActive = true;
+            p.Software__c = 'AC100';
+            p.Offering_Product_Type__c = 'Atos';
+            products.add(p);
+        }
+        insert products; 
+        
+        set<id> acccids = new set<id>();
+        Account IRISParentAccount = Utils.createParentIRISAccount();
+        insert IRISParentAccount;
+
+        //acccids.add(IRISParentAccount);
+        List<Account> accList = new List<account>();
+        Account CustomerAccount1 = Bkp_Utils.createChildCustomerAccount('Test Customer Account1', IRISParentAccount.Id);
+        CustomerAccount1.Type = 'Z002';
+        accList.add(CustomerAccount1);
+
+        Account CustomerAccount2 = Bkp_Utils.createChildCustomerAccount('Test Customer Account2', IRISParentAccount.Id);
+        CustomerAccount2.Type = 'Z002';
+        accList.add(CustomerAccount2);
+
+        Account CustomerAccount3 = Bkp_Utils.createChildCustomerAccount('Test Customer Account2', IRISParentAccount.Id);
+        CustomerAccount3.Type = 'Z002';
+        accList.add(CustomerAccount3);        
+
+        insert accList;
+
+        for(Account ac: accList){
+            acccids.add(ac.id);
+        }
+
+        Contact con =new Contact();
+        con.lastname='test';
+        con.accountId=CustomerAccount1.Id;
+        con.MailingCountry='India';
+        con.FirstName = 'NDA';
+        con.LastName = 'Contact';
+        insert con;
+        
+        Profit_Center__c pf = Bkp_Utils.createProfitCenter();
+        pf.shortname_GBU__c = 'FRA';
+        pf.shortname_country__c = 'FR';
+        pf.Leading_Profit_Center__c = true;
+        pf.service_line__c = 'SYN';
+        pf.active__c = 0;
+        insert pf;
+
+        List<Opportunity> oppList = new List<Opportunity>();
+
+        Opportunity Oportunity1 = Bkp_Utils.createOpportunity(CustomerAccount1.Id, pf.Id);
+        Oportunity1.Rainbow_Exemption_indicator__c ='RRP006';
+        Oportunity1.Profit_Center__c =pf.Id;
+        Oportunity1.Name = 'Test Opp 1';
+        oppList.add(Oportunity1);
+        
+        Opportunity Oportunity2 = Bkp_Utils.createOpportunity(CustomerAccount2.Id, pf.Id);
+        Oportunity2.Rainbow_Exemption_indicator__c ='RRP006';
+        Oportunity2.Profit_Center__c =pf.Id;
+        Oportunity2.Name = 'Test Opp 1';
+        oppList.add(Oportunity2);
+
+        Opportunity Oportunity3 = Bkp_Utils.createOpportunity(CustomerAccount3.Id, pf.Id);
+        Oportunity3.Rainbow_Exemption_indicator__c ='RRP006';
+        Oportunity3.Profit_Center__c =pf.Id;
+        Oportunity3.Name = 'Test Opp 1';
+        oppList.add(Oportunity3);
+        
+        insert oppList;
+
+        // Create test results
+        List<OpportunityResultJSON> results = new List<OpportunityResultJSON>();
+
+        OpportunityResultJSON result1 = new OpportunityResultJSON();
+        result1.partnerCrmUniqueIdentifier = oppList[0].Id;
+        result1.isSuccess = true;
+        result1.errors = new List<String>();
+        result1.apnCrmUniqueIdentifier = 'APN001';
+        results.add(result1);
+
+        OpportunityResultJSON result2 = new OpportunityResultJSON();
+        result2.partnerCrmUniqueIdentifier = oppList[1].Id;
+        result2.isSuccess = false;
+        result2.errors = new List<String>{'Error 1', 'Error 2'};
+        result2.apnCrmUniqueIdentifier = null;
+        results.add(result2);
+
+        OpportunityResultJSON result3 = new OpportunityResultJSON();
+        result3.partnerCrmUniqueIdentifier = oppList[2].Id;
+        result3.isSuccess = true;
+        result3.errors = null;
+        result3.apnCrmUniqueIdentifier = 'APN002';
+        results.add(result3);
+
+        // Execute the method
+        Test.startTest();
+        AceHelperMethodsV2.processOutboundUpdateResults(results);
+        Test.stopTest();
+
+        // Verify the updates
+        List<Opportunity> updatedOpportunities = [SELECT Id, AWS_Update_Success__c, AWS_Update_Errors__c, APN_CRM_Unique_Identifier__c FROM Opportunity WHERE Id IN :oppList];
+        
+        // Check the first opportunity
+        Opportunity opp1 = updatedOpportunities[0];
+        System.assertEquals('true', opp1.AWS_Update_Success__c);
+        System.assertEquals(null, opp1.AWS_Update_Errors__c);
+        System.assertEquals('APN001', opp1.APN_CRM_Unique_Identifier__c);
+
+        // Check the second opportunity
+        Opportunity opp2 = updatedOpportunities[1];
+        System.assertEquals('false', opp2.AWS_Update_Success__c);
+        System.assertEquals('Error 2;Error 1;', opp2.AWS_Update_Errors__c);
+        System.assertEquals(null, opp2.APN_CRM_Unique_Identifier__c);
+
+        // Check the third opportunity
+        Opportunity opp3 = updatedOpportunities[2];
+        System.assertEquals('true', opp3.AWS_Update_Success__c);
+        System.assertEquals(null, opp3.AWS_Update_Errors__c);
+        System.assertEquals('APN002', opp3.APN_CRM_Unique_Identifier__c);
+    }
 
 }
