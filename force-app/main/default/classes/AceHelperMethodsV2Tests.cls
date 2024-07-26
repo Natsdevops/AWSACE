@@ -271,7 +271,7 @@ public class AceHelperMethodsV2Tests{
         firstApproved = AceHelperMethodsV2.CheckFirstApproved(o,OppJson);
         System.AssertEquals(False,firstApproved);
     }
-    /*
+    
     @isTest
     public static void CheckFirstLaunchedTest(){
         Opportunity o = new Opportunity();
@@ -299,6 +299,7 @@ public class AceHelperMethodsV2Tests{
         System.AssertEquals(False,firstLaunched);
     }
     
+    /*
     @isTest
     public static void CheckFirstClosedLostTest(){
         Opportunity o = new Opportunity();
