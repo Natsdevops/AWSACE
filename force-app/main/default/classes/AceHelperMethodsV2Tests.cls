@@ -327,13 +327,14 @@ public class AceHelperMethodsV2Tests{
         System.AssertEquals(False,firstClosedLost);
     }
 
-    /*
+    
     @isTest
     public static void getHistoricalAtosAPNListTest(){
         List<String> testList = AceHelperMethodsV2.getHistoricalAtosAPNList();
         system.Assert(testList.size() > 0);
     }
 
+    /*
     @isTest
     public static void isHistoricalAtosAPNTest(){
         List<String> testList = new List<String>{'O999999','O999998','O999997'};
