@@ -241,7 +241,7 @@ public class AceHelperMethodsV2{
         o.AWS_Industry__c = json.industry;
         o.Expected_Monthly_AWS_Revenue__c = Integer.valueOf(json.expectedMonthlyAwsRevenue);
         o.AWS_Acceptance_Status__c = json.status;
-        o.Opportunity_ownership__c = json.opportunityOwnership;
+        o.AWS_Opportunity_Originator__c = json.opportunityOwnership;
         o.AWS_Sales_Rep__c = json.aWSSalesRepName;
         o.AWS_Sales_Rep_Email__c = json.aWSSalesRepEmail;
         o.AWS_Customer_Title__c = json.customerTitle;
@@ -250,12 +250,15 @@ public class AceHelperMethodsV2{
         o.AWS_Customer_Email__c = json.customerEmail;
         o.AWS_Customer_Phone__c = json.customerPhone;
         o.nextStep = json.nextStep;
-        o.AWS_Sub_Use_Case__c = json.subUseCase; 
         o.Is_Opp_From_Marketing_Activity__c = json.IsOppFromMarketingActivity;
         o.Marketing_Activity_Channel__c = json.marketingActivityChannel;
         o.Marketing_Activity_Use_Case__c = json.marketingActivityUsecase;
         o.AWS_SF_Campaign_Name__c = json.awsSFCampaignName;
         o.RFX_Solicitation_Number__c = json.rfxSolicitationNumber;
+        o.AWS_Sales_Activity__c = json.salesActivities;
+        o.type = convertOpportunityType(json);
+        o.Solution_Offered__c = convertSolution(json);
+        o.Delivery_Model__c = json.deliveryModel;
         return o;
     }
 
@@ -289,9 +292,10 @@ public class AceHelperMethodsV2{
         o.AWS_Customer_Email__c = json.customerEmail;
         o.AWS_Customer_Phone__c = json.customerPhone;
         o.nextStep = json.nextStep;
-        o.AWS_Sub_Use_Case__c = json.subUseCase; 
         o.Target_Consumption_Date__c = date.valueOf(json.targetCloseDate); 
         o.RFX_Solicitation_Number__c = json.rfxSolicitationNumber; 
+        o.Solution_Offered__c = convertSolution(json);
+        o.Delivery_Model__c = json.deliveryModel;
         return o;             
     }
 
@@ -340,6 +344,10 @@ public class AceHelperMethodsV2{
         oppJSON.marketingActivityUsecase = String.valueOf(o.Marketing_Activity_Use_Case__c);
         oppJSON.awsSFCampaignName = o.AWS_SF_Campaign_Name__c;
         oppJSON.rfxSolicitationNumber = o.RFX_Solicitation_Number__c;
+        oppJSON.solutionOffered = convertSolution(o);
+        oppJSON.opportunityType = convertOpportunityType(o);
+        oppJSON.salesActivities = o.AWS_Sales_Activity__c;
+        oppJSON.doesOppBelongToNatSec = o.Classified_national_security_information__c;
         System.debug('Prepare JSON Request:' + oppJSON);    
         return oppJSON;
     }
@@ -512,6 +520,197 @@ public class AceHelperMethodsV2{
         Boolean isHistoricalAtos = historicalList.contains(opp.APNCRMUniqueIdentifier);
         system.debug('isHistoricalAtos: ' + isHistoricalAtos);
         return isHistoricalAtos;
+    }
+
+    public static List<String> convertSolution(Opportunity o){
+        List<String> solutions = new List<String>();
+        if(o.Solution_Offered__c != null){
+            if(o.Solution_Offered__c.contains('Eviden Amazon API Gateway Specialization')){
+                solutions.add('S-0002096');
+            }
+
+            if(o.Solution_Offered__c.contains('Eviden Amazon Redshift Specialization')){
+                solutions.add('S-0002102');
+            }
+
+            if(o.Solution_Offered__c.contains('Eviden AWS Lambda Specialization')){
+                solutions.add('S-0002103');
+            }
+
+            if(o.Solution_Offered__c.contains('Eviden Data and Analytics Solutions')){
+                solutions.add('S-0002138');
+            }
+
+            if(o.Solution_Offered__c.contains('Eviden Financial Services Solution')){
+                solutions.add('S-0002179'); 
+            }
+
+            if(o.Solution_Offered__c.contains('Eviden Amazon CloudFront Specialization')){
+                solutions.add('S-0002527');
+            }
+
+            if(o.Solution_Offered__c.contains('Eviden Amazon RDS Specialization')){
+                solutions.add('S-0002531'); 
+            }
+
+            if(o.Solution_Offered__c.contains('Eviden Amazon RDS Specialization')){
+                solutions.add('S-0002587'); 
+            }
+
+            if(o.Solution_Offered__c.contains('Marketing and Commerce Services')){
+                solutions.add('S-0002096');
+            }
+
+            if(o.Solution_Offered__c.contains('Eviden DevOps Solutions')){
+                solutions.add('S-0002743');  
+            }
+
+            if(o.Solution_Offered__c.contains('Eviden Migration Specialization')){
+                solutions.add('S-0002765'); 
+            }
+        }
+
+        return solutions;
+    }
+
+    public static string convertSolution(OpportunityJSON o){
+        string solutions = '';
+        if(o.solutionOffered != null){
+            if(o.solutionOffered.contains('S-0002096')){
+                if(solutions == ''){
+                    solutions = solutions + 'Eviden Amazon API Gateway Specialization';
+                }
+                else{
+                    solutions = solutions + ';Eviden Amazon API Gateway Specialization';
+                }
+            }
+
+            if(o.solutionOffered.contains('S-0002102')){
+                if(solutions == ''){
+                    solutions = solutions + 'Eviden Amazon Redshift Specialization';
+                }
+                else{
+                    solutions = solutions + ';Eviden Amazon Redshift Specialization';
+                }
+            }
+
+            if(o.solutionOffered.contains('S-0002103')){
+                if(solutions == ''){
+                    solutions = solutions + 'Eviden AWS Lambda Specialization';
+                }
+                else{
+                    solutions = solutions + ';Eviden AWS Lambda Specialization';
+                }
+            }
+
+            if(o.solutionOffered.contains('S-0002138')){
+                if(solutions == ''){
+                    solutions = solutions + 'Eviden Data and Analytics Solutions';
+                }
+                else{
+                    solutions = solutions + ';Eviden Data and Analytics Solutions';
+                }
+            }
+
+            if(o.solutionOffered.contains('S-0002179')){
+                if(solutions == ''){
+                    solutions = solutions + 'Eviden Financial Services Solution';
+                }
+                else{
+                    solutions = solutions + ';Eviden Financial Services Solution';
+                }
+            }
+
+            if(o.solutionOffered.contains('S-0002527')){
+                if(solutions == ''){
+                    solutions = solutions + 'Eviden Amazon CloudFront Specialization';
+                }
+                else{
+                    solutions = solutions + ';Eviden Amazon CloudFront Specialization';
+                }
+            }
+
+            if(o.solutionOffered.contains('S-0002531')){
+                if(solutions == ''){
+                    solutions = solutions + 'Eviden Amazon RDS Specialization';
+                }
+                else{
+                    solutions = solutions + ';Eviden Amazon RDS Specialization';
+                }
+            }
+
+            if(o.solutionOffered.contains('S-0002587')){
+                if(solutions == ''){
+                    solutions = solutions + 'Marketing and Commerce Services';
+                }
+                else{
+                    solutions = solutions + ';Marketing and Commerce Services';
+                }
+            }
+
+            if(o.solutionOffered.contains('S-0002743')){
+                if(solutions == ''){
+                    solutions = solutions + 'Eviden DevOps Solutions';
+                }
+                else{
+                    solutions = solutions + ';Eviden DevOps Solutions';
+                }  
+            }
+
+            if(o.solutionOffered.contains('S-0002765')){
+                if(solutions == ''){
+                    solutions = solutions + 'Eviden Migration Specialization';
+                }
+                else{
+                    solutions = solutions + ';Eviden Migration Specialization';
+                }
+            }
+        }
+
+        return solutions;
+    }
+
+    public static string convertOpportunityType(Opportunity o){
+        string type = '';
+
+        if(o.type != null){
+            switch on o.type{
+                when 'NN'{
+                    type = 'Net New Business';
+                }
+                when 'NE'{
+                    type = 'Expansion';
+                }
+                when 'FE'{
+                    type = 'Expansion';
+                }
+                when 'RE'{
+                    type = 'Flat Renewal';
+                }
+            }
+        }
+
+        return type;
+    }
+
+    public static string convertOpportunityType(OpportunityJSON o){
+        string type = '';
+
+        if(o.OpportunityType != null){
+            switch on o.opportunityType{
+                when 'Net New Business'{
+                    type = 'NN';
+                }
+                when 'Expansion'{
+                    type = 'NE';
+                }
+                when 'Flat Renewal'{
+                    type = 'RE';
+                }
+            }
+        }
+
+        return type;
     }
 //---------------------------------API REQUESTS ----------------------------------------      
             

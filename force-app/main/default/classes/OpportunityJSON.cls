@@ -29,43 +29,13 @@ public Class OpportunityJSON{
         public Date closedLostDate;
         public String IsOppFromMarketingActivity;
         public String  rfxSolicitationNumber;
-
-        public String projectDescription{
-            get{ return projectDescription;}
-            set{
-                if(value == null){
-                    projectDescription = 'CLOUDAMIZE PLATFORM will be used by the customer for an on-prem TCO assessment and migration planning for AWS. The engagement will run for 60 days to uncover workloads that can be migrated to the cloud. This will be done using the Cloudamize SaaS running on AWS.';
-                }
-                else
-                {
-                    projectDescription = value;
-                }
-            }
-        }
-        
-        public Decimal expectedMonthlyAwsRevenue{
-            get{ return expectedMonthlyAwsRevenue; }
-            set{
-                if(value == null){
-                    expectedMonthlyAwsRevenue = 1000000;
-                }
-                else{
-                    expectedMonthlyAwsRevenue = value;
-                }
-            }
-        }
-        
-        public String industry{
-            get{ return industry; }
-            set{
-                if(value == 'Not Specified'){
-                    industry = 'Software & Internet';
-                }
-                else{
-                    industry = value;
-                }
-            }
-        }
+        public List<String> solutionOffered;
+        public String opportunityType;
+        public String projectDescription;       
+        public Decimal expectedMonthlyAwsRevenue;        
+        public String industry;
+        public string salesActivities;
+        public String doesOppBelongToNatSec;
         
         //Read Only fields
         public String APNCRMUniqueIdentifier;
